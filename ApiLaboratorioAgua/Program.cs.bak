@@ -1,0 +1,141 @@
+using Aplicacion.Dtos;
+using Aplicacion.Services;
+using Dominio.IRepository;
+using Infraestructura.Data;
+using Infraestructura.Repositories;
+using Microsoft.EntityFrameworkCore;
+using QuestPDF;
+using QuestPDF.Infrastructure;
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure QuestPDF license to Community to disable license validation exception
+QuestPDF.Settings.License = LicenseType.Community;
+
+// Add services to the container.
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Configurar DbContext según el environment
+builder.Services.AddDbContext<LabAguaDbContext>(options =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        // Development: InMemory para rapidez en debug
+        options.UseInMemoryDatabase("LabAguaDb");
+    }
+    else
+    {
+        // Production: SQLite para persistencia
+        var configured = builder.Configuration.GetConnectionString("defaultConnection");
+        var dbPath = Path.Combine(AppContext.BaseDirectory, "LabAgua.db");
+        
+        var conn = string.IsNullOrWhiteSpace(configured)
+            ? $"Data Source={dbPath}"
+            : configured;
+        
+        // Si la connection string es relativa, anclala a la carpeta del exe
+        if (conn.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
+        {
+            var value = conn.Substring("Data Source=".Length).Trim();
+            var isRelative = !Path.IsPathRooted(value);
+            if (isRelative)
+                conn = $"Data Source={Path.Combine(AppContext.BaseDirectory, value)}";
+        }
+        
+        options.UseSqlite(conn);
+    }
+});
+
+
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<IMuestraRepository, MuestraRepository>();
+builder.Services.AddScoped<ILibroEntradaRepository, LibroDeEntradaRepository>();
+builder.Services.AddScoped<ILibroBacteriologiaRepository, BacteriologicoRepository>();
+builder.Services.AddScoped<ILibroFisicoQuimicoRepository, FisicoQuimicoRepository>();
+builder.Services.AddScoped<MuestraService>();
+builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<LibroDeEntradaService>();
+builder.Services.AddScoped<FisicoQuimicoService>();
+builder.Services.AddScoped<BacteriologicoService>();
+builder.Services.AddScoped<ReporteService>();
+var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var clienteService = scope.ServiceProvider.GetRequiredService<ClienteService>();
+    var libroDeEntradaService = scope.ServiceProvider.GetRequiredService<LibroDeEntradaService>();
+
+    // Crear usuario si no existe
+    var clienteDto = new ClientesDto
+    {
+        Nombre = "Usuario Demo",
+        Email = "demo@correo.com",
+        Telefono = "123456789"
+    };
+    await clienteService.RegistrarClienteAsync(clienteDto);
+
+    // Crear libro de entrada con 2 muestras
+    var libroEntradaDto = new LibroDeEntradaDto
+    {
+        Procedencia = "Inicial",
+        Observaciones = "Libro de entrada creado autom�ticamente",
+        SitioExtraccion = "Sitio de prueba",
+        Muestras = new List<MuestraDto>
+        {
+            new MuestraDto
+            {
+                ClienteId = 1,
+                SitioExtraccion = "R�o Paran�",
+                NombreMuestreador = "Juan P�rez",
+                Latitud = -34.6037,
+                Longitud = -58.3816,
+                FechaExtraccion = DateTime.Now.Date,
+                HoraExtraccion = new TimeSpan(10, 0, 0),
+                TipoMuestra = TipoDeMuestraDto.Bacteriologica
+            },
+            new MuestraDto
+            {
+                ClienteId = 1,
+                SitioExtraccion = "Laguna Set�bal",
+                NombreMuestreador = "Ana L�pez",
+                Latitud = -31.6333,
+                Longitud = -60.7000,
+                FechaExtraccion = DateTime.Now.Date,
+                HoraExtraccion = new TimeSpan(11, 30, 0),
+                TipoMuestra = TipoDeMuestraDto.FisicoQuimica
+            }
+        }
+    };
+    await libroDeEntradaService.RegistrarLibroEntradaAsync(libroEntradaDto);
+}
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Evita warning cuando la app corre solo por HTTP (sin endpoint HTTPS configurado)
+var aspnetcoreUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")
+                    ?? builder.Configuration["ASPNETCORE_URLS"];
+var hasHttpsEndpoint = !string.IsNullOrWhiteSpace(aspnetcoreUrls)
+                       && aspnetcoreUrls.Contains("https://", StringComparison.OrdinalIgnoreCase);
+
+if (!app.Environment.IsDevelopment() || hasHttpsEndpoint)
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+///TODO:terminar servicios y controladores, probar en swagger y que los datos no se guarden en base de datos, buscar una forma de prueba

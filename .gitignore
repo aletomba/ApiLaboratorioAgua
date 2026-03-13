@@ -1,0 +1,47 @@
+## ── Build outputs ──────────────────────────────────────────────────────────
+bin/
+obj/
+publish_out/
+dist/
+
+## ── Base de datos SQLite (nunca subir datos reales) ────────────────────────
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+## ── Secretos y configs locales ─────────────────────────────────────────────
+# El appsettings.json genérico SÍ se incluye (no tiene credenciales sensibles).
+# El de Development también es seguro; igualmente se excluye por convención.
+appsettings.Development.json
+appsettings.Production.json
+secrets.json
+*.pfx
+*.p12
+
+# User Secrets de .NET
+**/Properties/launchSettings.json
+
+## ── Visual Studio / Rider ───────────────────────────────────────────────────
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## ── Paquetes NuGet restaurados ──────────────────────────────────────────────
+*.nupkg
+packages/
+
+## ── Logs y archivos temporales ──────────────────────────────────────────────
+*.log
+logs/
+*.tmp
+*.temp
+
+## ── Sistema operativo ───────────────────────────────────────────────────────
+Thumbs.db
+desktop.ini
+.DS_Store
