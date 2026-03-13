@@ -104,6 +104,30 @@ namespace Infrastructure.Repositories
             return (items, totalCount);
         }
 
+        public async Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 50;
+            if (pageSize > 500) pageSize = 500;
+
+            var desdeDate = desde.Date;
+            var hastaDate = hasta.Date;
+
+            var query = _context.LibroEntradas
+                .AsNoTracking()
+                .Where(le => le.Fecha.Date >= desdeDate && le.Fecha.Date <= hastaDate)
+                .WithFullMuestras();
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(le => le.Fecha)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
         public async Task<LibroDeEntrada> GetByIdAsync(int id)
         {
             return await _context.LibroEntradas

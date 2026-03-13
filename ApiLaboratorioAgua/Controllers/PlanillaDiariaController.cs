@@ -41,6 +41,21 @@ namespace ApiLaboratorioAgua.Controllers
             return Ok(result);
         }
 
+        /// <summary>Busca planillas por rango de fechas (inclusivo).</summary>
+        [HttpGet("por-rango")]
+        public async Task<IActionResult> GetByFechaRango(
+            [FromQuery] DateTime desde,
+            [FromQuery] DateTime hasta,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50)
+        {
+            if (desde > hasta)
+                return BadRequest("La fecha 'desde' no puede ser mayor que 'hasta'.");
+
+            var result = await _service.GetByFechaRangoAsync(desde, hasta, page, pageSize);
+            return Ok(result);
+        }
+
         /// <summary>
         /// Registra una nueva planilla diaria.
         /// Crea automáticamente el LibroDeEntrada con una muestra por punto de muestreo.
