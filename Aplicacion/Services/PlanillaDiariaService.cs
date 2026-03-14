@@ -47,6 +47,19 @@ namespace Aplicacion.Services
             return MapToResponseDto(planilla);
         }
 
+        public async Task<PagedResultDto<PlanillaDiariaResponseDto>> GetByFechaRangoAsync(
+            DateTime desde, DateTime hasta, int page = 1, int pageSize = 50)
+        {
+            var (items, total) = await _planillaRepo.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
+            return new PagedResultDto<PlanillaDiariaResponseDto>
+            {
+                Items = items.Select(MapToResponseDto).ToList(),
+                TotalCount = total,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
         /// <summary>
         /// Crea la planilla diaria con su LibroDeEntrada, 
         /// las muestras por punto de muestreo y el ensayo de jarras.

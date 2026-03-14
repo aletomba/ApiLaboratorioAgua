@@ -483,5 +483,49 @@ namespace Aplicacion.Services
         PageSize = pageSize
     };
 }
+
+        public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetLibroEntradasByFechaRangoAsync(
+            DateTime desde, DateTime hasta, int page = 1, int pageSize = 50)
+        {
+            var (libros, totalCount) = await _libroEntradaRepository.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
+
+            var items = libros.Select(le => new LibroDeEntradaResponseDto
+            {
+                Id = le.Id,
+                FechaRegistro = le.Fecha,
+                FechaLlegada = le.FechaLLegada,
+                FechaAnalisis = le.FechaAnalisis,
+                Procedencia = le.Procedencia,
+                SitioExtraccion = le.SitioExtraccion,
+                Observaciones = le.Observaciones,
+                Muestras = le.Muestras?.Select(m => new MuestraResponseDto
+                {
+                    Id = m.Id,
+                    Procedencia = m.Procedencia,
+                    NombreMuestreador = m.NombreMuestreador,
+                    Latitud = m.Latitud,
+                    Longitud = m.Longitud,
+                    FechaExtraccion = m.FechaExtraccion,
+                    HoraExtraccion = m.HoraExtraccion,
+                    TipoMuestra = m.TipoMuestra switch
+                    {
+                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
+                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
+                        _ => throw new ArgumentException("Tipo de muestra no válido.")
+                    },
+                    ClienteId = m.ClienteId,
+                    ClienteNombre = m.Cliente?.Nombre,
+                    LibroEntradaId = m.LibroEntradaId
+                }).ToList() ?? new List<MuestraResponseDto>()
+            }).ToList();
+
+            return new PagedResultDto<LibroDeEntradaResponseDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
     }
 }
