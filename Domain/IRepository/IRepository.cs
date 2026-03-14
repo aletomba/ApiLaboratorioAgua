@@ -29,7 +29,8 @@ namespace Dominio.IRepository
         // ✨ NUEVOS - Paginados
         Task<(List<LibroDeEntrada> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize);
         Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByProcedenciaPagedAsync(string procedencia, int page, int pageSize);
-        
+        Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize);
+
         Task<LibroDeEntrada> GetByIdAsync(int id);
         Task<List<LibroDeEntrada>> GetByProcedenciaAsync(string procedencia);
         Task<List<LibroDeEntrada>> GetByMuestraIdAsync(int muestraId);
@@ -60,6 +61,7 @@ namespace Dominio.IRepository
         Task<PlanillaDiaria?> GetByIdAsync(int id);
         Task<PlanillaDiaria?> GetByFechaAsync(DateTime fecha);
         Task<(List<PlanillaDiaria> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize);
+        Task<(List<PlanillaDiaria> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize);
         Task UpdateAsync(PlanillaDiaria planilla);
         Task DeleteAsync(int id);
     }

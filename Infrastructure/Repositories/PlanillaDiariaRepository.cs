@@ -57,6 +57,25 @@ namespace Infrastructure.Repositories
             return (items, total);
         }
 
+        public async Task<(List<PlanillaDiaria> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize)
+        {
+            var desdeDate = desde.Date;
+            var hastaDate = hasta.Date;
+
+            var query = _context.PlanillasDiarias
+                .Include(p => p.EnsayoJarras)
+                .Where(p => p.Fecha.Date >= desdeDate && p.Fecha.Date <= hastaDate)
+                .OrderByDescending(p => p.Fecha);
+
+            var total = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, total);
+        }
+
         public async Task UpdateAsync(PlanillaDiaria planilla)
         {
             _context.PlanillasDiarias.Update(planilla);

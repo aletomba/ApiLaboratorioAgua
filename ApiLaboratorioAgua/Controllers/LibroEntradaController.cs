@@ -43,6 +43,23 @@ namespace ApiLaboratorioAgua.Controllers
         }
 
         /// <summary>
+        /// Busca libros de entrada por rango de fechas (fecha de registro)
+        /// </summary>
+        [HttpGet("por-fecha")]
+        public async Task<IActionResult> GetLibroEntradasPorFecha(
+            [FromQuery] DateTime desde,
+            [FromQuery] DateTime hasta,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50)
+        {
+            if (desde > hasta)
+                return BadRequest("La fecha 'desde' no puede ser mayor que 'hasta'.");
+
+            var result = await _libroEntradaService.GetLibroEntradasByFechaRangoAsync(desde, hasta, page, pageSize);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Registra un nuevo libro de entrada con sus muestras asociadas,
         /// creando automáticamente entradas en LibroBacteriologia o LibroFisicoQuimico.
         /// </summary>
