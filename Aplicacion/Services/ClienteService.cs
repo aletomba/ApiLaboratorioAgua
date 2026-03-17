@@ -1,5 +1,5 @@
 ﻿using Infrastructure.Dtos;
-using Infrastructure.MyExeptions;
+using Dominio;
 using Dominio.Entities;
 using Dominio.IRepository;
 
@@ -30,23 +30,21 @@ namespace Aplicacion.Services
             await _clienteRepository.AddAsync(cliente);
         }
 
-        public async Task<ClienteResponseDto> GetClienteByIdAsync(int id)
+        public async Task<Result<ClienteResponseDto>> GetClienteByIdAsync(int id)
         {
             var cliente = await _clienteRepository.GetByIdAsync(id);
             if (cliente == null)
-            {
-                throw new NotFoundException($"Cliente con ID {id} no encontrado.");
-            }
+                return Result<ClienteResponseDto>.Failure($"Cliente con ID {id} no encontrado.");
 
             var muestras = await _muestraRepository.GetByClienteIdAsync(id);
-            return new ClienteResponseDto
+            return Result<ClienteResponseDto>.Success(new ClienteResponseDto
             {
                 Id = cliente.Id,
-                Nombre = cliente.Nombre,             
+                Nombre = cliente.Nombre,
                 Telefono = cliente.Telefono,
                 Email = cliente.Email,
                 NumeroMuestras = muestras?.Count ?? 0
-            };
+            });
         }
 
         public async Task<List<ClienteResponseDto>> GetAllClientesAsync()
@@ -69,26 +67,28 @@ namespace Aplicacion.Services
 
             return result;
         }
-        public async Task UpdateClienteAsync(ClientesDto clienteDto)
+        public async Task<Result<string>> UpdateClienteAsync(ClientesDto clienteDto)
         {
             var cliente = await _clienteRepository.GetByIdAsync(clienteDto.Id);
             if (cliente == null)
-                throw new NotFoundException($"Cliente con ID {clienteDto.Id} no encontrado.");
+                return Result<string>.Failure($"Cliente con ID {clienteDto.Id} no encontrado.");
 
             cliente.Nombre = clienteDto.Nombre;
             cliente.Telefono = clienteDto.Telefono;
             cliente.Email = clienteDto.Email;
 
             await _clienteRepository.UpdateAsync(cliente);
+            return Result<string>.Success("Cliente actualizado con éxito.");
         }
 
-        public async Task DeleteClienteAsync(int id)
+        public async Task<Result<string>> DeleteClienteAsync(int id)
         {
             var cliente = await _clienteRepository.GetByIdAsync(id);
             if (cliente == null)
-                throw new NotFoundException($"Cliente con ID {id} no encontrado.");
+                return Result<string>.Failure($"Cliente con ID {id} no encontrado.");
 
             await _clienteRepository.DeleteAsync(id);
+            return Result<string>.Success("Cliente eliminado con éxito.");
         }
     }
 }

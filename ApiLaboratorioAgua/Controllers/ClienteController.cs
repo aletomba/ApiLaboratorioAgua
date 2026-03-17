@@ -35,8 +35,10 @@ namespace ApiLaboratorioAgua.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetCliente(int id)
         {
-            var cliente = await _clienteService.GetClienteByIdAsync(id);
-            return Ok(cliente);
+            var result = await _clienteService.GetClienteByIdAsync(id);
+            if (!result.IsSuccess)
+                return NotFound(new { error = result.Error });
+            return Ok(result.Value);
         }
 
         /// <summary>
@@ -59,8 +61,10 @@ namespace ApiLaboratorioAgua.Controllers
             if (id != clienteDto.Id)
                 return BadRequest("El ID de la URL no coincide con el del cuerpo de la solicitud.");
 
-            await _clienteService.UpdateClienteAsync(clienteDto);
-            return Ok(new { message = "Cliente actualizado con éxito." });
+            var result = await _clienteService.UpdateClienteAsync(clienteDto);
+            if (!result.IsSuccess)
+                return NotFound(new { error = result.Error });
+            return Ok(new { message = result.Value });
         }
 
         /// <summary>
@@ -69,8 +73,10 @@ namespace ApiLaboratorioAgua.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteCliente(int id)
         {
-            await _clienteService.DeleteClienteAsync(id);
-            return Ok(new { message = "Cliente eliminado con éxito." });
+            var result = await _clienteService.DeleteClienteAsync(id);
+            if (!result.IsSuccess)
+                return NotFound(new { error = result.Error });
+            return Ok(new { message = result.Value });
         }
     }
 }
