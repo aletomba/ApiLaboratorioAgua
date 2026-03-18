@@ -18,6 +18,7 @@ namespace Infrastructure.Dtos
     {
         public int MuestraId { get; set; }
         public string? Procedencia { get; set; }
+        public string? SitioExtraccion { get; set; }
         public string? NombreMuestreador { get; set; }
         public TipoDeMuestraDto TipoMuestra { get; set; }
         public int ClienteId { get; set; }
