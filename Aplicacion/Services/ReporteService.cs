@@ -41,6 +41,7 @@ namespace Aplicacion.Services
                     {
                         MuestraId = muestraCompleta.Id,
                         Procedencia = muestraCompleta.Procedencia,
+                        SitioExtraccion = muestraCompleta.SitioExtraccion,
                         NombreMuestreador = muestraCompleta.NombreMuestreador,
                         TipoMuestra = muestraCompleta.TipoMuestra switch
                         {
@@ -135,7 +136,7 @@ namespace Aplicacion.Services
                         {
                             col.Item().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Column(c2 =>
                             {
-                                c2.Item().Text($"Muestra: {m.Procedencia} - Tipo: {m.TipoMuestra}").Bold();
+                                c2.Item().Text($"Muestra: {m.SitioExtraccion} - Tipo: {m.TipoMuestra}").Bold();
                                 c2.Item().Text($"Muestreador: {m.NombreMuestreador}");
                                 c2.Item().Text($"Cliente: {m.ClienteNombre} (ID {m.ClienteId})");
 
