@@ -41,13 +41,13 @@ namespace Aplicacion.Services
                     {
                         MuestraId = muestraCompleta.Id,
                         Procedencia = muestraCompleta.Procedencia,
-                        SitioExtraccion = muestraCompleta.SitioExtraccion,
+                        SitioExtraccion = muestraCompleta.Procedencia,
                         NombreMuestreador = muestraCompleta.NombreMuestreador,
                         TipoMuestra = muestraCompleta.TipoMuestra switch
                         {
                             TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
                             TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                            _ => throw new ArgumentException("Tipo de muestra no v�lido.")
+                            _ => throw new ArgumentException("Tipo de muestra no válido.")
                         },
                         ClienteId = muestraCompleta.ClienteId,
                         ClienteNombre = muestraCompleta.Cliente?.Nombre
