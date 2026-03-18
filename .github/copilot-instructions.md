@@ -27,8 +27,8 @@ Clean Architecture con 4 capas:
 - **API corre en**: `http://localhost:5261` (producción vía START.bat)
 
 ## Git Flow
-1. Crear rama `feat/nombre-feature` desde `develop`
-2. Commit + push de la rama feat
+1. Usar **GitHub MCP** para crear rama `feat/nombre-feature` desde `develop`
+2. Commit + push de la rama feat (vía terminal/git local)
 3. Usar **GitHub MCP** para crear PR `feat` → `develop`, mergearlo y borrar la rama feat
 4. Usar **GitHub MCP** para crear PR `develop` → `main` y mergearlo
 5. Repos GitHub: `aletomba/ApiLaboratorioAgua` y `aletomba/AppPlanillaPlantaPot`
