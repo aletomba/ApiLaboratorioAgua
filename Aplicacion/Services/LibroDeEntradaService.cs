@@ -302,7 +302,7 @@ namespace Aplicacion.Services
                 if (muestraExistente != null)
                 {
                     // Actualizar muestra existente
-                    muestraExistente.Procedencia = libroEntradaDto.Procedencia;
+                    muestraExistente.Procedencia = muestraDto.SitioExtraccion;
                     muestraExistente.NombreMuestreador = muestraDto.NombreMuestreador;
                     muestraExistente.Latitud = muestraDto.Latitud;
                     muestraExistente.Longitud = muestraDto.Longitud;
