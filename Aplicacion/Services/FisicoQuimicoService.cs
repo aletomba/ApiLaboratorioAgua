@@ -32,7 +32,6 @@ namespace Aplicacion.Services
                 Calcio = fq.Calcio,
                 Magnesio = fq.Magnesio,
                 Dbo5 = fq.Dbo5,
-                Cloro = fq.Cloro,
                 MuestraId = fq.MuestraId
             }).ToList();
         }
@@ -57,7 +56,6 @@ namespace Aplicacion.Services
                 Calcio = entity.Calcio,
                 Magnesio = entity.Magnesio,
                 Dbo5 = entity.Dbo5,
-                Cloro = entity.Cloro,
                 MuestraId = entity.MuestraId
             };
         }
@@ -79,7 +77,6 @@ namespace Aplicacion.Services
                 Calcio = dto.Calcio,
                 Magnesio = dto.Magnesio,
                 Dbo5 = dto.Dbo5,
-                Cloro = dto.Cloro,
                 MuestraId = dto.MuestraId
             };
 
@@ -101,7 +98,6 @@ namespace Aplicacion.Services
                 Calcio = created.Calcio,
                 Magnesio = created.Magnesio,
                 Dbo5 = created.Dbo5,
-                Cloro = created.Cloro,
                 MuestraId = created.MuestraId
             };
         }
@@ -122,7 +118,6 @@ namespace Aplicacion.Services
             entity.Calcio = dto.Calcio;
             entity.Magnesio = dto.Magnesio;
             entity.Dbo5 = dto.Dbo5;
-            entity.Cloro = dto.Cloro;
 
             await _repo.UpdateAsync(entity);
         }
