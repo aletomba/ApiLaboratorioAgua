@@ -16,6 +16,7 @@ Clean Architecture con 4 capas:
 - Comando: `dotnet ef migrations add NombreMigracion --project Infrastructure --startup-project ApiLaboratorioAgua`
 
 ## Convenciones
+- Antes de implementar código con dependencias externas, consultar **Context7 MCP** para obtener documentación actualizada de la librería (EF Core, ASP.NET, xUnit, Moq, etc.).
 - Fechas siempre `DateTime`, formato query string `yyyy-MM-dd`
 - Endpoints paginados retornan: `{ items, totalCount, page, pageSize, totalPages, hasNextPage, hasPreviousPage }`
 - Repositorios implementan `IRepository<T>` genérico en `Domain/IRepository/`
@@ -27,11 +28,13 @@ Clean Architecture con 4 capas:
 - **API corre en**: `http://localhost:5261` (producción vía START.bat)
 
 ## Git Flow
+Todo el flujo se ejecuta con **GitHub MCP** (`mcp_github_*`). Respetar este orden siempre:
 1. Usar **GitHub MCP** para crear rama `feat/nombre-feature` desde `develop`
 2. Commit + push de la rama feat (vía terminal/git local)
 3. Usar **GitHub MCP** para crear PR `feat` → `develop`, mergearlo y borrar la rama feat
 4. Usar **GitHub MCP** para crear PR `develop` → `main` y mergearlo
 5. Repos GitHub: `aletomba/ApiLaboratorioAgua` y `aletomba/AppPlanillaPlantaPot`
+6. **Al finalizar el flujo completo, siempre hacer `git checkout develop` para dejar el repo posicionado en `develop`.**
 
 > El token del MCP está configurado en `settings.json` local (nunca en este archivo).
 

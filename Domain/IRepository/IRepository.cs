@@ -40,7 +40,10 @@ namespace Dominio.IRepository
     public interface ILibroBacteriologiaRepository
     {
         Task<Bacteriologico> AddAsync(Bacteriologico Bacteriologia);
-        Task<List<Bacteriologico>> GetAllAsync(); // Nuevo método
+        Task<List<Bacteriologico>> GetAllAsync();
+        Task<(List<Bacteriologico> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize);
+        Task<(List<Bacteriologico> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize);
+        Task<(List<Bacteriologico> Items, int TotalCount)> GetByClienteIdPagedAsync(int clienteId, int page, int pageSize);
         Task<Bacteriologico?> GetByIdAsync(int id);
         Task UpdateAsync(Bacteriologico bacteriologico);
         Task DeleteAsync(int id);
@@ -49,9 +52,12 @@ namespace Dominio.IRepository
     public interface ILibroFisicoQuimicoRepository
     {
         Task<FisicoQuimico> AddAsync(FisicoQuimico FisicoQuimico);
-        Task<List<FisicoQuimico>> GetAllAsync(); // Nuevo método
-        Task<FisicoQuimico?> GetByIdAsync(int id); // for edit, nullable
-        Task UpdateAsync(FisicoQuimico fisicoQuimico); // for edit
+        Task<List<FisicoQuimico>> GetAllAsync();
+        Task<(List<FisicoQuimico> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize);
+        Task<(List<FisicoQuimico> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize);
+        Task<(List<FisicoQuimico> Items, int TotalCount)> GetByClienteIdPagedAsync(int clienteId, int page, int pageSize);
+        Task<FisicoQuimico?> GetByIdAsync(int id);
+        Task UpdateAsync(FisicoQuimico fisicoQuimico);
         Task DeleteAsync(int id);
     }
 
