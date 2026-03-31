@@ -17,9 +17,34 @@ namespace ApiLaboratorioAgua.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50)
         {
-            var result = await _service.GetAllAsync();
+            var result = await _service.GetAllPagedAsync(page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet("por-fecha")]
+        public async Task<IActionResult> GetPorFecha(
+            [FromQuery] DateTime desde,
+            [FromQuery] DateTime hasta,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50)
+        {
+            if (desde > hasta)
+                return BadRequest("La fecha 'desde' no puede ser mayor que 'hasta'.");
+            var result = await _service.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet("por-cliente/{clienteId:int}")]
+        public async Task<IActionResult> GetPorCliente(
+            int clienteId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50)
+        {
+            var result = await _service.GetByClienteIdPagedAsync(clienteId, page, pageSize);
             return Ok(result);
         }
 
