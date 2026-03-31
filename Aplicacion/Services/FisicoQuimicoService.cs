@@ -16,50 +16,70 @@ namespace Aplicacion.Services
         public async Task<List<FisicoQuimicoDto>> GetAllAsync()
         {
             var entities = await _repo.GetAllAsync();
-            return entities.Select(fq => new FisicoQuimicoDto
-            {
-                Id = fq.Id,
-                Fecha = fq.Fecha,
-                FechaLLegada = fq.FechaLLegada,
-                FechaAnalisis = fq.FechaAnalisis,
-                Procedencia = fq.Procedencia,
-                Ph = fq.Ph,
-                Turbidez = fq.Turbidez,
-                Alcalinidad = fq.Alcalinidad,
-                Dureza = fq.Dureza,
-                Nitritos = fq.Nitritos,
-                Cloruros = fq.Cloruros,
-                Calcio = fq.Calcio,
-                Magnesio = fq.Magnesio,
-                Dbo5 = fq.Dbo5,
-                Cloro = fq.Cloro,
-                MuestraId = fq.MuestraId
-            }).ToList();
+            return entities.Select(MapToDto).ToList();
         }
+
+        public async Task<PagedResultDto<FisicoQuimicoDto>> GetAllPagedAsync(int page, int pageSize)
+        {
+            var (items, totalCount) = await _repo.GetAllPagedAsync(page, pageSize);
+            return new PagedResultDto<FisicoQuimicoDto>
+            {
+                Items = items.Select(MapToDto).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<PagedResultDto<FisicoQuimicoDto>> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize)
+        {
+            var (items, totalCount) = await _repo.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
+            return new PagedResultDto<FisicoQuimicoDto>
+            {
+                Items = items.Select(MapToDto).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<PagedResultDto<FisicoQuimicoDto>> GetByClienteIdPagedAsync(int clienteId, int page, int pageSize)
+        {
+            var (items, totalCount) = await _repo.GetByClienteIdPagedAsync(clienteId, page, pageSize);
+            return new PagedResultDto<FisicoQuimicoDto>
+            {
+                Items = items.Select(MapToDto).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        private static FisicoQuimicoDto MapToDto(FisicoQuimico fq) => new FisicoQuimicoDto
+        {
+            Id = fq.Id,
+            Fecha = fq.Fecha,
+            FechaLLegada = fq.FechaLLegada,
+            FechaAnalisis = fq.FechaAnalisis,
+            Procedencia = fq.Procedencia,
+            Ph = fq.Ph,
+            Turbidez = fq.Turbidez,
+            Alcalinidad = fq.Alcalinidad,
+            Dureza = fq.Dureza,
+            Nitritos = fq.Nitritos,
+            Cloruros = fq.Cloruros,
+            Calcio = fq.Calcio,
+            Magnesio = fq.Magnesio,
+            Dbo5 = fq.Dbo5,
+            Cloro = fq.Cloro,
+            MuestraId = fq.MuestraId
+        };
 
         public async Task<FisicoQuimicoDto?> GetByIdAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null) return null;
-            return new FisicoQuimicoDto
-            {
-                Id = entity.Id,
-                Fecha = entity.Fecha,
-                FechaLLegada = entity.FechaLLegada,
-                FechaAnalisis = entity.FechaAnalisis,
-                Procedencia = entity.Procedencia,
-                Ph = entity.Ph,
-                Turbidez = entity.Turbidez,
-                Alcalinidad = entity.Alcalinidad,
-                Dureza = entity.Dureza,
-                Nitritos = entity.Nitritos,
-                Cloruros = entity.Cloruros,
-                Calcio = entity.Calcio,
-                Magnesio = entity.Magnesio,
-                Dbo5 = entity.Dbo5,
-                Cloro = entity.Cloro,
-                MuestraId = entity.MuestraId
-            };
+            return MapToDto(entity);
         }
 
         public async Task<FisicoQuimicoDto> CreateAsync(FisicoQuimicoDto dto)
@@ -84,26 +104,7 @@ namespace Aplicacion.Services
             };
 
             var created = await _repo.AddAsync(entity);
-
-            return new FisicoQuimicoDto
-            {
-                Id = created.Id,
-                Fecha = created.Fecha,
-                FechaLLegada = created.FechaLLegada,
-                FechaAnalisis = created.FechaAnalisis,
-                Procedencia = created.Procedencia,
-                Ph = created.Ph,
-                Turbidez = created.Turbidez,
-                Alcalinidad = created.Alcalinidad,
-                Dureza = created.Dureza,
-                Nitritos = created.Nitritos,
-                Cloruros = created.Cloruros,
-                Calcio = created.Calcio,
-                Magnesio = created.Magnesio,
-                Dbo5 = created.Dbo5,
-                Cloro = created.Cloro,
-                MuestraId = created.MuestraId
-            };
+            return MapToDto(created);
         }
 
         public async Task UpdateAsync(FisicoQuimicoEditDto dto)

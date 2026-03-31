@@ -28,6 +28,71 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<(List<FisicoQuimico> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 50;
+            if (pageSize > 500) pageSize = 500;
+
+            var query = _context.FisicoQuimicos
+                .AsNoTracking()
+                .Include(f => f.Muestra);
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(f => f.Fecha)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+        public async Task<(List<FisicoQuimico> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 50;
+            if (pageSize > 500) pageSize = 500;
+
+            var desdeDate = desde.Date;
+            var hastaDate = hasta.Date.AddDays(1);
+
+            var query = _context.FisicoQuimicos
+                .AsNoTracking()
+                .Include(f => f.Muestra)
+                .Where(f => f.Fecha >= desdeDate && f.Fecha < hastaDate);
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(f => f.Fecha)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+        public async Task<(List<FisicoQuimico> Items, int TotalCount)> GetByClienteIdPagedAsync(int clienteId, int page, int pageSize)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 50;
+            if (pageSize > 500) pageSize = 500;
+
+            var query = _context.FisicoQuimicos
+                .AsNoTracking()
+                .Include(f => f.Muestra)
+                .Where(f => f.Muestra != null && f.Muestra.ClienteId == clienteId);
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(f => f.Fecha)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
         public async Task<FisicoQuimico?> GetByIdAsync(int id)
         {
             return await _context.FisicoQuimicos
