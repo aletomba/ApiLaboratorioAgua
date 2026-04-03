@@ -286,7 +286,12 @@ namespace Aplicacion.Services
             // Actualizar y agregar muestras
             foreach (var muestraDto in muestrasDto)
             {
-                var muestraExistente = muestrasActuales.FirstOrDefault(m => m.Id == muestraDto.Id);
+                // Solo buscar existente si el dto tiene un ID real (> 0).
+                // Si Id es 0, es muestra nueva y siempre va al branch de creación,
+                // evitando que varias muestras nuevas se sobreescriban entre sí.
+                var muestraExistente = muestraDto.Id > 0
+                    ? muestrasActuales.FirstOrDefault(m => m.Id == muestraDto.Id)
+                    : null;
 
                 var cliente = await _clienteRepository.GetByIdAsync(muestraDto.ClienteId);
                 if (cliente == null)
