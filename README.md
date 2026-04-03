@@ -5,8 +5,13 @@ API REST para gestión de análisis de calidad del agua potable desarrollada con
 ## Funcionalidades
 
 - Gestión de **clientes** (municipios / entes)
-- **Libro de entradas** de muestras con análisis bacteriológicos y físicoquímicos
-- **Planilla diaria** de planta potabilizadora (4 puntos de muestreo + ensayo de jarras)
+- **Libro de entradas** de muestras con soporte multi-muestra (bacteriológicas y físicoquímicas)
+- **Análisis físicoquímico** con campo Cloro y paginación por fecha / cliente
+- **Análisis bacteriológico** con paginación por fecha / cliente
+- **Planilla diaria** de planta potabilizadora:
+  - 4 puntos de muestreo
+  - Ensayo de jarras con campos Pre-Cal y Post-Cal (mg/L)
+  - Paginación por fecha
 - Generación de **reportes PDF** con QuestPDF
 - Logs estructurados con **Serilog**
 
@@ -58,24 +63,86 @@ ApiLaboratorioAgua.test/     ← Tests unitarios
    dotnet run
    ```
 
-   La API quedará disponible en `http://localhost:5000`.
+   La API quedará disponible en `http://localhost:5261`.
 
 ### Swagger / OpenAPI
 
-Navegá a `http://localhost:5000/swagger` para explorar todos los endpoints.
+Navegá a `http://localhost:5261/swagger` para explorar todos los endpoints.
 
 ## Endpoints principales
 
+### Libro de Entradas
+
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/api/libroEntrada` | Listado paginado |
-| POST | `/api/libroEntrada/registrar` | Registrar nuevo libro |
-| PUT | `/api/libroEntrada/{id}` | Actualizar |
-| DELETE | `/api/libroEntrada/{id}` | Eliminar |
-| GET | `/api/libroEntrada/{id}/reporte` | Descargar PDF |
-| POST | `/api/PlanillaDiaria/registrar` | Registrar planilla diaria |
-| GET | `/api/Bacteriologico` | Análisis bacteriológicos |
-| GET | `/api/FisicoQuimico` | Análisis físicoquímicos |
+| GET | `/libroEntrada` | Listado paginado (`page`, `pageSize`) |
+| GET | `/libroEntrada/{id}` | Obtener por ID |
+| GET | `/libroEntrada/por-fecha` | Filtrar por rango de fechas (`desde`, `hasta`) |
+| GET | `/libroEntrada/por-procedencia` | Filtrar por procedencia |
+| POST | `/libroEntrada/registrar` | Registrar nuevo libro (con una o más muestras) |
+| PUT | `/libroEntrada/{id}` | Actualizar (agrega / edita / elimina muestras) |
+| DELETE | `/libroEntrada/{id}` | Eliminar |
+| GET | `/libroEntrada/{id}/reporte` | Descargar PDF |
+
+### Análisis Físicoquímico
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/FisicoQuimico` | Listado paginado |
+| GET | `/FisicoQuimico/por-fecha` | Filtrar por rango de fechas |
+| GET | `/FisicoQuimico/por-cliente/{clienteId}` | Filtrar por cliente |
+
+### Análisis Bacteriológico
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/Bacteriologico` | Listado paginado |
+| GET | `/Bacteriologico/por-fecha` | Filtrar por rango de fechas |
+| GET | `/Bacteriologico/por-cliente/{clienteId}` | Filtrar por cliente |
+
+### Planilla Diaria
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/PlanillaDiaria` | Listado paginado |
+| GET | `/PlanillaDiaria/por-fecha` | Filtrar por rango de fechas |
+| POST | `/PlanillaDiaria/registrar` | Registrar planilla diaria |
+| PUT | `/PlanillaDiaria/{id}` | Actualizar |
+| DELETE | `/PlanillaDiaria/{id}` | Eliminar |
+
+### Clientes
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/Cliente` | Listado de clientes |
+| POST | `/Cliente` | Crear cliente |
+| PUT | `/Cliente/{id}` | Actualizar cliente |
+| DELETE | `/Cliente/{id}` | Eliminar cliente |
+
+### Respuesta paginada
+
+Todos los endpoints de listado devuelven:
+
+```json
+{
+  "items": [...],
+  "totalCount": 42,
+  "page": 1,
+  "pageSize": 50,
+  "totalPages": 1,
+  "hasNextPage": false,
+  "hasPreviousPage": false
+}
+```
+
+## Historial de cambios relevantes
+
+| Versión | Cambio |
+|---|---|
+| — | Paginación en LibroEntrada, FisicoQuimico, Bacteriologico y PlanillaDiaria |
+| — | Campo `Cloro` en análisis físicoquímico |
+| — | Campos `PreCal` y `PostCal` (mg/L) en Ensayo de Jarras |
+| — | Fix: al añadir varias muestras nuevas en update de LibroEntrada, solo persistía la última |
 
 ## Licencia
 
