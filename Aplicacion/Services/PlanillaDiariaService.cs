@@ -141,6 +141,8 @@ namespace Aplicacion.Services
                     Dosis4 = dto.EnsayoJarras.Dosis4,
                     Dosis5 = dto.EnsayoJarras.Dosis5,
                     DosisSeleccionada = dto.EnsayoJarras.DosisSeleccionada,
+                    PreCal = dto.EnsayoJarras.PreCal,
+                    PostCal = dto.EnsayoJarras.PostCal,
                     UnidadMedida = "mg/L"
                 };
             }
@@ -177,6 +179,8 @@ namespace Aplicacion.Services
                 planilla.EnsayoJarras.Dosis4 = dto.EnsayoJarras.Dosis4;
                 planilla.EnsayoJarras.Dosis5 = dto.EnsayoJarras.Dosis5;
                 planilla.EnsayoJarras.DosisSeleccionada = dto.EnsayoJarras.DosisSeleccionada;
+                planilla.EnsayoJarras.PreCal = dto.EnsayoJarras.PreCal;
+                planilla.EnsayoJarras.PostCal = dto.EnsayoJarras.PostCal;
             }
             else if (dto.EnsayoJarras != null && planilla.EnsayoJarras == null)
             {
@@ -188,6 +192,8 @@ namespace Aplicacion.Services
                     Dosis4 = dto.EnsayoJarras.Dosis4,
                     Dosis5 = dto.EnsayoJarras.Dosis5,
                     DosisSeleccionada = dto.EnsayoJarras.DosisSeleccionada,
+                    PreCal = dto.EnsayoJarras.PreCal,
+                    PostCal = dto.EnsayoJarras.PostCal,
                     UnidadMedida = "mg/L"
                 };
             }
@@ -275,6 +281,8 @@ namespace Aplicacion.Services
                     Dosis4 = p.EnsayoJarras.Dosis4,
                     Dosis5 = p.EnsayoJarras.Dosis5,
                     DosisSeleccionada = p.EnsayoJarras.DosisSeleccionada,
+                    PreCal = p.EnsayoJarras.PreCal,
+                    PostCal = p.EnsayoJarras.PostCal,
                     UnidadMedida = p.EnsayoJarras.UnidadMedida
                 };
 
