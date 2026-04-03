@@ -41,6 +41,8 @@ namespace Infrastructure.Dtos
         public double? Dosis4 { get; set; }
         public double? Dosis5 { get; set; }
         public double? DosisSeleccionada { get; set; }
+        public double? PreCal { get; set; }
+        public double? PostCal { get; set; }
         public string UnidadMedida { get; set; } = "mg/L";
     }
 

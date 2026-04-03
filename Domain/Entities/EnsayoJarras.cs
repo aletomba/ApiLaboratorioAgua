@@ -14,6 +14,10 @@ namespace Dominio.Entities
         // La dosis seleccionada (la de mejor turbidez)
         public double? DosisSeleccionada { get; set; }
 
+        // Cal pre y post ensayo (mg/L)
+        public double? PreCal { get; set; }
+        public double? PostCal { get; set; }
+
         // Unidad de medida: siempre mg/L
         public string UnidadMedida { get; set; } = "mg/L";
 
