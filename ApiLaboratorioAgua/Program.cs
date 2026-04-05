@@ -161,9 +161,14 @@ app.UseExceptionHandler(errorApp =>
         int statusCode = 500;
         string message = "Error interno del servidor.";
 
-        if (ex is Infrastructure.MyExeptions.NotFoundException)
+        if (ex is Dominio.Exceptions.NotFoundException)
         {
             statusCode = 404;
+            message = ex.Message;
+        }
+        else if (ex is ArgumentException)
+        {
+            statusCode = 400;
             message = ex.Message;
         }
         else if (ex != null)
@@ -171,22 +176,32 @@ app.UseExceptionHandler(errorApp =>
             message = ex.Message;
         }
 
-        // Recopilar cadena completa de inner exceptions
-        var innerMessages = new List<string>();
-        var inner = ex?.InnerException;
-        while (inner != null)
-        {
-            innerMessages.Add(inner.Message);
-            inner = inner.InnerException;
-        }
-
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new { 
-            status = statusCode, 
-            error = message,
-            innerErrors = innerMessages
-        });
+
+        // innerErrors solo en Development para no exponer detalles internos en producción (OWASP)
+        if (app.Environment.IsDevelopment())
+        {
+            var innerMessages = new List<string>();
+            var inner = ex?.InnerException;
+            while (inner != null)
+            {
+                innerMessages.Add(inner.Message);
+                inner = inner.InnerException;
+            }
+            await context.Response.WriteAsJsonAsync(new {
+                status = statusCode,
+                error = message,
+                innerErrors = innerMessages
+            });
+        }
+        else
+        {
+            await context.Response.WriteAsJsonAsync(new {
+                status = statusCode,
+                error = message
+            });
+        }
     });
 });
 
