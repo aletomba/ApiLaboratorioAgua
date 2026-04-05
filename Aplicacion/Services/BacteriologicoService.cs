@@ -1,7 +1,7 @@
 ﻿using Infrastructure.Dtos;
 using Dominio.IRepository;
 using Dominio.Entities;
-using Infrastructure.MyExeptions;
+using Dominio.Exceptions;
 
 namespace Aplicacion.Services
 {
@@ -115,6 +115,9 @@ namespace Aplicacion.Services
 
         public async Task DeleteAsync(int id)
         {
+            var entity = await _repo.GetByIdAsync(id);
+            if (entity == null)
+                throw new NotFoundException($"Bacteriologico con ID {id} no encontrado.");
             await _repo.DeleteAsync(id);
         }
     }

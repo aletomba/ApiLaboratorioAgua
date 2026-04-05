@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Dtos;
 using Dominio.IRepository;
 using Dominio.Entities;
+using Dominio.Exceptions;
 
 namespace Aplicacion.Services
 {    
@@ -111,7 +112,7 @@ namespace Aplicacion.Services
         {
             var entity = await _repo.GetByIdAsync(dto.Id);
             if (entity == null)
-                throw new Infrastructure.MyExeptions.NotFoundException($"FisicoQuimico con ID {dto.Id} no encontrado.");
+                throw new NotFoundException($"FisicoQuimico con ID {dto.Id} no encontrado.");
 
             // Actualizar campos editables
             entity.Ph = dto.Ph;
@@ -132,7 +133,7 @@ namespace Aplicacion.Services
         {
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null)
-                throw new Infrastructure.MyExeptions.NotFoundException($"FisicoQuimico con ID {id} no encontrado.");
+                throw new NotFoundException($"FisicoQuimico con ID {id} no encontrado.");
             await _repo.DeleteAsync(id);
         }
     }
