@@ -1,5 +1,5 @@
 ﻿using Infrastructure.Dtos;
-using Infrastructure.MyExeptions;
+using Dominio.Exceptions;
 using Dominio.Entities;
 using Dominio.IRepository;
 
