@@ -1,6 +1,6 @@
 using Infrastructure.Dtos;
 using Dominio.IRepository;
-using Infrastructure.MyExeptions;
+using Dominio.Exceptions;
 using Dominio.Entities;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;

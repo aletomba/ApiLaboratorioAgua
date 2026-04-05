@@ -171,7 +171,7 @@ app.UseExceptionHandler(errorApp =>
             statusCode = 400;
             message = ex.Message;
         }
-        else if (ex != null)
+        else if (ex != null && app.Environment.IsDevelopment())
         {
             message = ex.Message;
         }
