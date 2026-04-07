@@ -1,3 +1,4 @@
+using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.Exceptions;
 using Dominio.Entities;
@@ -26,7 +27,7 @@ namespace Aplicacion.Services
             var (items, total) = await _planillaRepo.GetAllPagedAsync(page, pageSize);
             return new PagedResultDto<PlanillaDiariaResponseDto>
             {
-                Items = items.Select(MapToResponseDto).ToList(),
+                Items = items.Select(p => p.ToDto()).ToList(),
                 TotalCount = total,
                 Page = page,
                 PageSize = pageSize
@@ -37,14 +38,14 @@ namespace Aplicacion.Services
         {
             var planilla = await _planillaRepo.GetByIdAsync(id)
                 ?? throw new NotFoundException($"Planilla con ID {id} no encontrada.");
-            return MapToResponseDto(planilla);
+            return planilla.ToDto();
         }
 
         public async Task<PlanillaDiariaResponseDto> GetByFechaAsync(DateTime fecha)
         {
             var planilla = await _planillaRepo.GetByFechaAsync(fecha)
                 ?? throw new NotFoundException($"No existe planilla para la fecha {fecha:yyyy-MM-dd}.");
-            return MapToResponseDto(planilla);
+            return planilla.ToDto();
         }
 
         public async Task<PagedResultDto<PlanillaDiariaResponseDto>> GetByFechaRangoAsync(
@@ -53,7 +54,7 @@ namespace Aplicacion.Services
             var (items, total) = await _planillaRepo.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
             return new PagedResultDto<PlanillaDiariaResponseDto>
             {
-                Items = items.Select(MapToResponseDto).ToList(),
+                Items = items.Select(p => p.ToDto()).ToList(),
                 TotalCount = total,
                 Page = page,
                 PageSize = pageSize
@@ -74,8 +75,8 @@ namespace Aplicacion.Services
             if (existente != null)
             {
                 await UpdateAsync(existente.Id, dto);
-                return MapToResponseDto(await _planillaRepo.GetByIdAsync(existente.Id)
-                    ?? throw new Exception("Error al recuperar la planilla actualizada."));
+                return (await _planillaRepo.GetByIdAsync(existente.Id)
+                    ?? throw new Exception("Error al recuperar la planilla actualizada.")).ToDto();
             }
 
             // Crear las muestras con sus análisis fisicoquímicos
@@ -158,8 +159,8 @@ namespace Aplicacion.Services
             };
 
             var creada = await _planillaRepo.AddAsync(planilla);
-            return MapToResponseDto(await _planillaRepo.GetByIdAsync(creada.Id)
-                ?? throw new Exception("Error al recuperar la planilla creada."));
+            return (await _planillaRepo.GetByIdAsync(creada.Id)
+                ?? throw new Exception("Error al recuperar la planilla creada.")).ToDto();
         }
 
         public async Task UpdateAsync(int id, PlanillaDiariaDto dto)
@@ -243,59 +244,5 @@ namespace Aplicacion.Services
             PuntoMuestreoDto.Consumo     => PuntoMuestreo.Consumo,
             _ => throw new ArgumentException("PuntoMuestreo no válido.")
         };
-
-        private static PlanillaDiariaResponseDto MapToResponseDto(PlanillaDiaria p)
-        {
-            var analisis = p.LibroEntrada?.Muestras?
-                .Where(m => m.PuntoMuestreo.HasValue && m.FisicoQuimico != null)
-                .Select(m => new AnalisisPuntoDto
-                {
-                    PuntoMuestreo = m.PuntoMuestreo!.Value switch
-                    {
-                        PuntoMuestreo.AguaNatural => PuntoMuestreoDto.AguaNatural,
-                        PuntoMuestreo.Decantada   => PuntoMuestreoDto.Decantada,
-                        PuntoMuestreo.Filtrada    => PuntoMuestreoDto.Filtrada,
-                        PuntoMuestreo.Consumo     => PuntoMuestreoDto.Consumo,
-                        _ => PuntoMuestreoDto.AguaNatural
-                    },
-                    Ph = m.FisicoQuimico!.Ph,
-                    Turbidez = m.FisicoQuimico.Turbidez,
-                    Alcalinidad = m.FisicoQuimico.Alcalinidad,
-                    Dureza = m.FisicoQuimico.Dureza,
-                    Nitritos = m.FisicoQuimico.Nitritos,
-                    Cloruros = m.FisicoQuimico.Cloruros,
-                    Calcio = m.FisicoQuimico.Calcio,
-                    Magnesio = m.FisicoQuimico.Magnesio,
-                    Dbo5 = m.FisicoQuimico.Dbo5,
-                    Cloro = m.FisicoQuimico.Cloro,
-                }).ToList() ?? new List<AnalisisPuntoDto>();
-
-            EnsayoJarrasDto? ensayo = null;
-            if (p.EnsayoJarras != null)
-                ensayo = new EnsayoJarrasDto
-                {
-                    Id = p.EnsayoJarras.Id,
-                    Dosis1 = p.EnsayoJarras.Dosis1,
-                    Dosis2 = p.EnsayoJarras.Dosis2,
-                    Dosis3 = p.EnsayoJarras.Dosis3,
-                    Dosis4 = p.EnsayoJarras.Dosis4,
-                    Dosis5 = p.EnsayoJarras.Dosis5,
-                    DosisSeleccionada = p.EnsayoJarras.DosisSeleccionada,
-                    PreCal = p.EnsayoJarras.PreCal,
-                    PostCal = p.EnsayoJarras.PostCal,
-                    UnidadMedida = p.EnsayoJarras.UnidadMedida
-                };
-
-            return new PlanillaDiariaResponseDto
-            {
-                Id = p.Id,
-                Fecha = p.Fecha,
-                Operador = p.Operador,
-                Observaciones = p.Observaciones,
-                LibroEntradaId = p.LibroEntradaId,
-                AnalisisPorPunto = analisis,
-                EnsayoJarras = ensayo
-            };
-        }
     }
 }
