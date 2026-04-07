@@ -1,4 +1,5 @@
-﻿using Infrastructure.Dtos;
+﻿using Aplicacion.Mappers;
+using Infrastructure.Dtos;
 using Dominio;
 using Dominio.Entities;
 using Dominio.IRepository;
@@ -37,14 +38,7 @@ namespace Aplicacion.Services
                 return Result<ClienteResponseDto>.Failure($"Cliente con ID {id} no encontrado.");
 
             var muestras = await _muestraRepository.GetByClienteIdAsync(id);
-            return Result<ClienteResponseDto>.Success(new ClienteResponseDto
-            {
-                Id = cliente.Id,
-                Nombre = cliente.Nombre,
-                Telefono = cliente.Telefono,
-                Email = cliente.Email,
-                NumeroMuestras = muestras?.Count ?? 0
-            });
+            return Result<ClienteResponseDto>.Success(cliente.ToDto(muestras?.Count ?? 0));
         }
 
         public async Task<List<ClienteResponseDto>> GetAllClientesAsync()
@@ -55,14 +49,7 @@ namespace Aplicacion.Services
             foreach (var cliente in clientes)
             {
                 var muestras = await _muestraRepository.GetByClienteIdAsync(cliente.Id);
-                result.Add(new ClienteResponseDto
-                {
-                    Id = cliente.Id,
-                    Nombre = cliente.Nombre,                    
-                    Telefono = cliente.Telefono,
-                    Email = cliente.Email,
-                    NumeroMuestras = muestras?.Count ?? 0
-                });
+                result.Add(cliente.ToDto(muestras?.Count ?? 0));
             }
 
             return result;
