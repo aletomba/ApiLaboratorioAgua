@@ -1,4 +1,5 @@
-﻿using Aplicacion.Mappers;
+﻿using Aplicacion.Factories;
+using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.Exceptions;
 using Dominio.Entities;
@@ -46,85 +47,10 @@ namespace Aplicacion.Services
                 if (cliente == null)
                     throw new NotFoundException($"Cliente con ID {muestraDto.ClienteId} no encontrado.");
 
-                TipoMuestra tipoMuestra = muestraDto.TipoMuestra switch
-                {
-                    TipoDeMuestraDto.Bacteriologica => TipoMuestra.Bacteriologica,
-                    TipoDeMuestraDto.FisicoQuimica => TipoMuestra.FisicoQuimica,
-                    _ => throw new ArgumentException("Tipo de muestra no válido.")
-                };
-
-                var muestra = new Muestra
-                {
-                    Procedencia = muestraDto.SitioExtraccion,                   
-                    NombreMuestreador = muestraDto.NombreMuestreador,
-                    Latitud = muestraDto.Latitud,
-                    Longitud = muestraDto.Longitud,
-                    FechaExtraccion = muestraDto.FechaExtraccion,
-                    HoraExtraccion = muestraDto.HoraExtraccion,
-                    TipoMuestra = tipoMuestra,
-                    ClienteId = muestraDto.ClienteId
-                };
-
-
-                // Asociar libro de análisis según tipo
-                if (tipoMuestra == TipoMuestra.Bacteriologica)
-                {
-                    muestra.Bacteriologia = new Bacteriologico
-                    {
-                        Fecha = libroEntradaDto.Fecha,
-                        FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                        FechaLLegada = libroEntradaDto.FechaLLegada,
-                        Procedencia = libroEntradaDto.Procedencia,
-                        SitioExtraccion = muestraDto.SitioExtraccion,
-                        ColiformesNmp = string.Empty,
-                        ColiformesFecalesNmp = string.Empty,
-                        ColoniasAgar = string.Empty,
-                        ColiFecalesUfc = string.Empty,
-                        Observaciones = string.Empty,
-                        Muestra = muestra
-                    };
-                }
-                else if (tipoMuestra == TipoMuestra.FisicoQuimica)
-                {
-                    muestra.FisicoQuimico = new FisicoQuimico
-                    {
-                        Fecha = libroEntradaDto.Fecha,
-                        FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                        FechaLLegada = libroEntradaDto.FechaLLegada,
-                        Procedencia = libroEntradaDto.Procedencia,
-                        SitioExtraccion = muestraDto.SitioExtraccion,
-                        Ph = string.Empty,
-                        Turbidez = string.Empty,
-                        Alcalinidad = string.Empty,
-                        Dureza = string.Empty,
-                        Nitritos = string.Empty,
-                        Cloruros = string.Empty,
-                        Calcio = string.Empty,
-                        Magnesio = string.Empty,
-                        Dbo5 = string.Empty,
-                        Muestra = muestra
-                    };
-                }
-
-                muestras.Add(muestra);
+                muestras.Add(LibroDeEntradaFactory.CreateMuestra(muestraDto, libroEntradaDto, muestraDto.SitioExtraccion));
             }
 
-            var libroEntrada = new LibroDeEntrada
-            {
-                Fecha = libroEntradaDto.Fecha,
-                FechaLLegada = libroEntradaDto.FechaLLegada,
-                FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                Procedencia = libroEntradaDto.Procedencia,
-                SitioExtraccion = libroEntradaDto.SitioExtraccion ?? string.Empty,
-                Observaciones = libroEntradaDto.Observaciones,
-                Muestras = muestras
-            };
-
-            foreach (var muestra in muestras)
-            {
-                muestra.LibroEntrada = libroEntrada;
-            }
-
+            var libroEntrada = LibroDeEntradaFactory.CreateLibroEntrada(libroEntradaDto, muestras);
             await _libroEntradaRepository.AddAsync(libroEntrada);
         }
 
@@ -188,12 +114,7 @@ namespace Aplicacion.Services
                 if (cliente == null)
                     throw new NotFoundException($"Cliente con ID {muestraDto.ClienteId} no encontrado.");
 
-                TipoMuestra tipoMuestra = muestraDto.TipoMuestra switch
-                {
-                    TipoDeMuestraDto.Bacteriologica => TipoMuestra.Bacteriologica,
-                    TipoDeMuestraDto.FisicoQuimica => TipoMuestra.FisicoQuimica,
-                    _ => throw new ArgumentException("Tipo de muestra no válido.")
-                };
+                var tipoMuestra = LibroDeEntradaFactory.ParseTipoMuestra(muestraDto.TipoMuestra);
 
                 if (muestraExistente != null)
                 {
@@ -207,107 +128,16 @@ namespace Aplicacion.Services
                     muestraExistente.TipoMuestra = tipoMuestra;
                     muestraExistente.ClienteId = muestraDto.ClienteId;
 
-                    // Actualizar o crear entidad de análisis
-                    if (tipoMuestra == TipoMuestra.Bacteriologica)
-                    {
-                        if (muestraExistente.Bacteriologia == null)
-                        {
-                            muestraExistente.Bacteriologia = new Bacteriologico
-                            {
-                                Fecha = libroEntradaDto.Fecha,
-                                FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                                FechaLLegada = libroEntradaDto.FechaLLegada,
-                                Procedencia = libroEntradaDto.Procedencia,
-                                SitioExtraccion = muestraDto.SitioExtraccion ?? string.Empty,
-                                ColiformesNmp = string.Empty,
-                                ColiformesFecalesNmp = string.Empty,
-                                ColoniasAgar = string.Empty,
-                                ColiFecalesUfc = string.Empty,
-                                Observaciones = string.Empty,
-                                Muestra = muestraExistente
-                            };
-                        }
-                    }
-                    else if (tipoMuestra == TipoMuestra.FisicoQuimica)
-                    {
-                        if (muestraExistente.FisicoQuimico == null)
-                        {
-                            muestraExistente.FisicoQuimico = new FisicoQuimico
-                            {
-                                Fecha = libroEntradaDto.Fecha,
-                                FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                                FechaLLegada = libroEntradaDto.FechaLLegada,
-                                Procedencia = libroEntradaDto.Procedencia,
-                                SitioExtraccion = muestraDto.SitioExtraccion ?? string.Empty,
-                                Ph = string.Empty,
-                                Turbidez = string.Empty,
-                                Alcalinidad = string.Empty,
-                                Dureza = string.Empty,
-                                Nitritos = string.Empty,
-                                Cloruros = string.Empty,
-                                Calcio = string.Empty,
-                                Magnesio = string.Empty,
-                                Dbo5 = string.Empty,
-                                Muestra = muestraExistente
-                            };
-                        }
-                    }
+                    // Crear entidad de análisis si no existe todavía
+                    if (tipoMuestra == TipoMuestra.Bacteriologica && muestraExistente.Bacteriologia == null)
+                        muestraExistente.Bacteriologia = LibroDeEntradaFactory.CreateBacteriologico(libroEntradaDto, muestraDto, muestraExistente);
+                    else if (tipoMuestra == TipoMuestra.FisicoQuimica && muestraExistente.FisicoQuimico == null)
+                        muestraExistente.FisicoQuimico = LibroDeEntradaFactory.CreateFisicoQuimico(libroEntradaDto, muestraDto, muestraExistente);
                 }
                 else
                 {
                     // Agregar nueva muestra
-                    var nuevaMuestra = new Muestra
-                    {
-                        Procedencia = libroEntradaDto.Procedencia,
-                        NombreMuestreador = muestraDto.NombreMuestreador,
-                        Latitud = muestraDto.Latitud,
-                        Longitud = muestraDto.Longitud,
-                        FechaExtraccion = muestraDto.FechaExtraccion,
-                        HoraExtraccion = muestraDto.HoraExtraccion,
-                        TipoMuestra = tipoMuestra,
-                        ClienteId = muestraDto.ClienteId
-                    };
-
-                    if (tipoMuestra == TipoMuestra.Bacteriologica)
-                    {
-                        nuevaMuestra.Bacteriologia = new Bacteriologico
-                        {
-                            Fecha = libroEntradaDto.Fecha,
-                            FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                            FechaLLegada = libroEntradaDto.FechaLLegada,
-                            Procedencia = libroEntradaDto.Procedencia,
-                            SitioExtraccion = muestraDto.SitioExtraccion ?? string.Empty,
-                            ColiformesNmp = string.Empty,
-                            ColiformesFecalesNmp = string.Empty,
-                            ColoniasAgar = string.Empty,
-                            ColiFecalesUfc = string.Empty,
-                            Observaciones = string.Empty,
-                            Muestra = nuevaMuestra
-                        };
-                    }
-                    else if (tipoMuestra == TipoMuestra.FisicoQuimica)
-                    {
-                        nuevaMuestra.FisicoQuimico = new FisicoQuimico
-                        {
-                            Fecha = libroEntradaDto.Fecha,
-                            FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                            FechaLLegada = libroEntradaDto.FechaLLegada,
-                            Procedencia = libroEntradaDto.Procedencia,
-                            SitioExtraccion = muestraDto.SitioExtraccion ?? string.Empty,
-                            Ph = string.Empty,
-                            Turbidez = string.Empty,
-                            Alcalinidad = string.Empty,
-                            Dureza = string.Empty,
-                            Nitritos = string.Empty,
-                            Cloruros = string.Empty,
-                            Calcio = string.Empty,
-                            Magnesio = string.Empty,
-                            Dbo5 = string.Empty,
-                            Muestra = nuevaMuestra
-                        };
-                    }
-
-                    muestrasActuales.Add(nuevaMuestra);
+                    muestrasActuales.Add(LibroDeEntradaFactory.CreateMuestra(muestraDto, libroEntradaDto, libroEntradaDto.Procedencia));
                 }
             }
 
