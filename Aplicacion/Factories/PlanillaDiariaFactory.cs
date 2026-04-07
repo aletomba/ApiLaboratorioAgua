@@ -53,7 +53,8 @@ namespace Aplicacion.Factories
         }
 
         public static LibroDeEntrada CreateLibroEntrada(PlanillaDiariaDto dto, List<Muestra> muestras)
-            => new LibroDeEntrada
+        {
+            var libro = new LibroDeEntrada
             {
                 Fecha = dto.Fecha,
                 FechaLLegada = dto.Fecha,
@@ -63,6 +64,12 @@ namespace Aplicacion.Factories
                 Observaciones = dto.Observaciones ?? string.Empty,
                 Muestras = muestras
             };
+
+            foreach (var muestra in muestras)
+                muestra.LibroEntrada = libro;
+
+            return libro;
+        }
 
         public static EnsayoJarras CreateEnsayoJarras(EnsayoJarrasDto dto)
             => new EnsayoJarras
@@ -75,7 +82,7 @@ namespace Aplicacion.Factories
                 DosisSeleccionada = dto.DosisSeleccionada,
                 PreCal = dto.PreCal,
                 PostCal = dto.PostCal,
-                UnidadMedida = "mg/L"
+                UnidadMedida = dto.UnidadMedida
             };
 
         public static PlanillaDiaria CreatePlanilla(PlanillaDiariaDto dto, int libroEntradaId, EnsayoJarras? ensayo)
@@ -112,6 +119,7 @@ namespace Aplicacion.Factories
             ensayo.DosisSeleccionada = dto.DosisSeleccionada;
             ensayo.PreCal = dto.PreCal;
             ensayo.PostCal = dto.PostCal;
+            ensayo.UnidadMedida = dto.UnidadMedida;
         }
     }
 }
