@@ -337,20 +337,20 @@ namespace Aplicacion.Services
         }
 
         public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetLibroEntradasByProcedenciaPagedAsync(
-    string procedencia, int page = 1, int pageSize = 50)
-{
-    var (libros, totalCount) = await _libroEntradaRepository.GetByProcedenciaPagedAsync(procedencia, page, pageSize);
-    
-    var items = libros.Select(le => le.ToDto()).ToList();
+            string procedencia, int page = 1, int pageSize = 50)
+        {
+            var (libros, totalCount) = await _libroEntradaRepository.GetByProcedenciaPagedAsync(procedencia, page, pageSize);
 
-    return new PagedResultDto<LibroDeEntradaResponseDto>
-    {
-        Items = items,
-        TotalCount = totalCount,
-        Page = page,
-        PageSize = pageSize
-    };
-}
+            var items = libros.Select(le => le.ToDto()).ToList();
+
+            return new PagedResultDto<LibroDeEntradaResponseDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
 
         public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetLibroEntradasByFechaRangoAsync(
             DateTime desde, DateTime hasta, int page = 1, int pageSize = 50)
