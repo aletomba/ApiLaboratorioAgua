@@ -1,4 +1,5 @@
-﻿using Infrastructure.Dtos;
+﻿using Aplicacion.Mappers;
+using Infrastructure.Dtos;
 using Dominio.Exceptions;
 using Dominio.Entities;
 using Dominio.IRepository;
@@ -25,35 +26,7 @@ namespace Aplicacion.Services
         {
             var (libros, totalCount) = await _libroEntradaRepository.GetAllPagedAsync(page, pageSize);
             
-            var items = libros.Select(le => new LibroDeEntradaResponseDto
-            {
-                Id = le.Id,
-                FechaRegistro = le.Fecha,
-                FechaLlegada = le.FechaLLegada,
-                FechaAnalisis = le.FechaAnalisis,
-                Procedencia = le.Procedencia,
-                SitioExtraccion = le.SitioExtraccion,
-                Observaciones = le.Observaciones,
-                Muestras = le.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            }).ToList();
+            var items = libros.Select(le => le.ToDto()).ToList();
 
             return new PagedResultDto<LibroDeEntradaResponseDto>
             {
@@ -163,34 +136,7 @@ namespace Aplicacion.Services
                 throw new NotFoundException($"Libro de entrada con ID {id} no encontrado.");
             }
 
-            return new LibroDeEntradaResponseDto
-            {
-                Id = libroEntrada.Id,
-                FechaRegistro = libroEntrada.Fecha,
-                FechaLlegada = libroEntrada.FechaLLegada,
-                FechaAnalisis = libroEntrada.FechaAnalisis,
-                Procedencia = libroEntrada.Procedencia,               
-                Observaciones = libroEntrada.Observaciones,
-                Muestras = libroEntrada.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            };
+            return libroEntrada.ToDto();
         }
 
         public async Task<List<LibroDeEntradaResponseDto>> GetLibroEntradasByMuestraIdAsync(int muestraId)
@@ -202,68 +148,13 @@ namespace Aplicacion.Services
             }
 
             var libroEntradas = await _libroEntradaRepository.GetByMuestraIdAsync(muestraId);
-            return libroEntradas.Select(le => new LibroDeEntradaResponseDto
-            {
-                Id = le.Id,
-                FechaRegistro = le.Fecha,
-                FechaLlegada = le.FechaLLegada,
-                FechaAnalisis = le.FechaAnalisis,
-                Procedencia = le.Procedencia,           
-                Observaciones = le.Observaciones,
-                Muestras = le.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            }).ToList();
+            return libroEntradas.Select(le => le.ToDto()).ToList();
         }
 
         public async Task<List<LibroDeEntradaResponseDto>> GetLibroEntradasByProcedenciaAsync(string procedencia)
         {
             var libros = await _libroEntradaRepository.GetByProcedenciaAsync(procedencia);
-            return libros.Select(le => new LibroDeEntradaResponseDto
-            {
-                Id = le.Id,
-                FechaRegistro = le.Fecha,
-                FechaLlegada = le.FechaLLegada,
-                FechaAnalisis = le.FechaAnalisis,
-                Procedencia = le.Procedencia,
-                SitioExtraccion = le.SitioExtraccion,
-                Observaciones = le.Observaciones,
-                Muestras = le.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            }).ToList();
+            return libros.Select(le => le.ToDto()).ToList();
         }
 
         public async Task UpdateLibroEntradaAsync(LibroDeEntradaDto libroEntradaDto)
@@ -446,83 +337,27 @@ namespace Aplicacion.Services
         }
 
         public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetLibroEntradasByProcedenciaPagedAsync(
-    string procedencia, int page = 1, int pageSize = 50)
-{
-    var (libros, totalCount) = await _libroEntradaRepository.GetByProcedenciaPagedAsync(procedencia, page, pageSize);
-    
-    var items = libros.Select(le => new LibroDeEntradaResponseDto
-    {
-        Id = le.Id,
-        FechaRegistro = le.Fecha,
-        FechaLlegada = le.FechaLLegada,
-        FechaAnalisis = le.FechaAnalisis,
-        Procedencia = le.Procedencia,
-        SitioExtraccion = le.SitioExtraccion,
-        Observaciones = le.Observaciones,
-        Muestras = le.Muestras?.Select(m => new MuestraResponseDto
+            string procedencia, int page = 1, int pageSize = 50)
         {
-            Id = m.Id,
-            Procedencia = m.Procedencia,
-            NombreMuestreador = m.NombreMuestreador,
-            Latitud = m.Latitud,
-            Longitud = m.Longitud,
-            FechaExtraccion = m.FechaExtraccion,
-            HoraExtraccion = m.HoraExtraccion,
-            TipoMuestra = m.TipoMuestra switch
-            {
-                TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                _ => throw new ArgumentException("Tipo de muestra no válido.")
-            },
-            ClienteId = m.ClienteId,
-            ClienteNombre = m.Cliente?.Nombre,
-            LibroEntradaId = m.LibroEntradaId
-        }).ToList() ?? new List<MuestraResponseDto>()
-    }).ToList();
+            var (libros, totalCount) = await _libroEntradaRepository.GetByProcedenciaPagedAsync(procedencia, page, pageSize);
 
-    return new PagedResultDto<LibroDeEntradaResponseDto>
-    {
-        Items = items,
-        TotalCount = totalCount,
-        Page = page,
-        PageSize = pageSize
-    };
-}
+            var items = libros.Select(le => le.ToDto()).ToList();
+
+            return new PagedResultDto<LibroDeEntradaResponseDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
 
         public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetLibroEntradasByFechaRangoAsync(
             DateTime desde, DateTime hasta, int page = 1, int pageSize = 50)
         {
             var (libros, totalCount) = await _libroEntradaRepository.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
 
-            var items = libros.Select(le => new LibroDeEntradaResponseDto
-            {
-                Id = le.Id,
-                FechaRegistro = le.Fecha,
-                FechaLlegada = le.FechaLLegada,
-                FechaAnalisis = le.FechaAnalisis,
-                Procedencia = le.Procedencia,
-                SitioExtraccion = le.SitioExtraccion,
-                Observaciones = le.Observaciones,
-                Muestras = le.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            }).ToList();
+            var items = libros.Select(le => le.ToDto()).ToList();
 
             return new PagedResultDto<LibroDeEntradaResponseDto>
             {
