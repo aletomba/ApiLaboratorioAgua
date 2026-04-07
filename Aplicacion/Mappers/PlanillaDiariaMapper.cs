@@ -11,7 +11,7 @@ namespace Aplicacion.Mappers
             PuntoMuestreo.Decantada   => PuntoMuestreoDto.Decantada,
             PuntoMuestreo.Filtrada    => PuntoMuestreoDto.Filtrada,
             PuntoMuestreo.Consumo     => PuntoMuestreoDto.Consumo,
-            _ => PuntoMuestreoDto.AguaNatural
+            _ => throw new ArgumentException($"PuntoMuestreo '{punto}' no tiene mapeo DTO.")
         };
 
         public static EnsayoJarrasDto? ToDto(this EnsayoJarras? e)
