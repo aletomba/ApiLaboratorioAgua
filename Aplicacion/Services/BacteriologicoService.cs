@@ -1,4 +1,5 @@
-﻿using Aplicacion.Mappers;
+﻿using Aplicacion.Factories;
+using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.IRepository;
 using Dominio.Entities;
@@ -66,20 +67,7 @@ namespace Aplicacion.Services
 
         public async Task<BacteriologicoDto> CreateAsync(BacteriologicoDto dto)
         {
-            var entity = new Bacteriologico
-            {
-                Fecha = dto.Fecha == default ? DateTime.Now : dto.Fecha,
-                FechaLLegada = dto.FechaLLegada == default ? DateTime.Now : dto.FechaLLegada,
-                FechaAnalisis = dto.FechaAnalisis == default ? DateTime.Now : dto.FechaAnalisis,
-                Procedencia = dto.Procedencia,
-                ColiformesNmp = dto.ColiformesNmp,
-                ColiformesFecalesNmp = dto.ColiformesFecalesNmp,
-                ColoniasAgar = dto.ColoniasAgar,
-                ColiFecalesUfc = dto.ColiFecalesUfc,
-                Observaciones = dto.Observaciones,
-                MuestraId = dto.MuestraId
-            };
-
+            var entity = BacteriologicoFactory.Create(dto);
             var created = await _repo.AddAsync(entity);
             return created.ToDto();
         }
@@ -90,11 +78,7 @@ namespace Aplicacion.Services
             if (entity == null)
                 throw new NotFoundException($"Bacteriologico con ID {dto.Id} no encontrado.");
 
-            entity.ColiformesNmp = dto.ColiformesNmp;
-            entity.ColiformesFecalesNmp = dto.ColiformesFecalesNmp;
-            entity.ColoniasAgar = dto.ColoniasAgar;
-            entity.ColiFecalesUfc = dto.ColiFecalesUfc;
-            entity.Observaciones = dto.Observaciones;
+            BacteriologicoFactory.Update(entity, dto);
 
             await _repo.UpdateAsync(entity);
         }
