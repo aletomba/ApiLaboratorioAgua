@@ -1,0 +1,16 @@
+services:
+  api:
+    build: .
+    container_name: laboratorio-agua-api
+    ports:
+      - "5261:5261"
+    volumes:
+      - labagua-data:/app/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5261
+      - ConnectionStrings__defaultConnection=Data Source=/app/data/LabAgua.db
+    restart: unless-stopped
+
+volumes:
+  labagua-data:
