@@ -1,4 +1,5 @@
-﻿using Infrastructure.Dtos;
+﻿using Aplicacion.Mappers;
+using Infrastructure.Dtos;
 using Dominio.IRepository;
 using Dominio.Entities;
 using Dominio.Exceptions;
@@ -17,7 +18,7 @@ namespace Aplicacion.Services
         public async Task<List<BacteriologicoDto>> GetAllAsync()
         {
             var entities = await _repo.GetAllAsync();
-            return entities.Select(MapToDto).ToList();
+            return entities.Select(b => b.ToDto()).ToList();
         }
 
         public async Task<PagedResultDto<BacteriologicoDto>> GetAllPagedAsync(int page, int pageSize)
@@ -25,7 +26,7 @@ namespace Aplicacion.Services
             var (items, totalCount) = await _repo.GetAllPagedAsync(page, pageSize);
             return new PagedResultDto<BacteriologicoDto>
             {
-                Items = items.Select(MapToDto).ToList(),
+                Items = items.Select(b => b.ToDto()).ToList(),
                 TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize
@@ -37,7 +38,7 @@ namespace Aplicacion.Services
             var (items, totalCount) = await _repo.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
             return new PagedResultDto<BacteriologicoDto>
             {
-                Items = items.Select(MapToDto).ToList(),
+                Items = items.Select(b => b.ToDto()).ToList(),
                 TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize
@@ -49,33 +50,18 @@ namespace Aplicacion.Services
             var (items, totalCount) = await _repo.GetByClienteIdPagedAsync(clienteId, page, pageSize);
             return new PagedResultDto<BacteriologicoDto>
             {
-                Items = items.Select(MapToDto).ToList(),
+                Items = items.Select(b => b.ToDto()).ToList(),
                 TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize
             };
         }
 
-        private static BacteriologicoDto MapToDto(Bacteriologico b) => new BacteriologicoDto
-        {
-            Id = b.Id,
-            Fecha = b.Fecha,
-            FechaLLegada = b.FechaLLegada,
-            FechaAnalisis = b.FechaAnalisis,
-            Procedencia = b.Procedencia,
-            ColiformesNmp = b.ColiformesNmp,
-            ColiformesFecalesNmp = b.ColiformesFecalesNmp,
-            ColoniasAgar = b.ColoniasAgar,
-            ColiFecalesUfc = b.ColiFecalesUfc,
-            Observaciones = b.Observaciones,
-            MuestraId = b.MuestraId
-        };
-
         public async Task<BacteriologicoDto?> GetByIdAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null) return null;
-            return MapToDto(entity);
+            return entity.ToDto();
         }
 
         public async Task<BacteriologicoDto> CreateAsync(BacteriologicoDto dto)
@@ -95,7 +81,7 @@ namespace Aplicacion.Services
             };
 
             var created = await _repo.AddAsync(entity);
-            return MapToDto(created);
+            return created.ToDto();
         }
 
         public async Task UpdateAsync(BacteriologicoDto dto)
