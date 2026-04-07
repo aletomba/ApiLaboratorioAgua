@@ -25,7 +25,10 @@ namespace Aplicacion.Factories
                 FechaExtraccion = muestraDto.FechaExtraccion,
                 HoraExtraccion = muestraDto.HoraExtraccion,
                 TipoMuestra = tipoMuestra,
-                ClienteId = muestraDto.ClienteId
+                ClienteId = muestraDto.ClienteId,
+                PuntoMuestreo = muestraDto.PuntoMuestreo.HasValue
+                    ? (PuntoMuestreo)muestraDto.PuntoMuestreo.Value
+                    : null
             };
 
             if (tipoMuestra == TipoMuestra.Bacteriologica)
@@ -69,6 +72,7 @@ namespace Aplicacion.Factories
                 Calcio = string.Empty,
                 Magnesio = string.Empty,
                 Dbo5 = string.Empty,
+                Cloro = string.Empty,
                 Muestra = muestra
             };
 
