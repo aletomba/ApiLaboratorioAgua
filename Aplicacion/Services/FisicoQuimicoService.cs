@@ -1,4 +1,5 @@
-﻿using Aplicacion.Mappers;
+﻿using Aplicacion.Factories;
+using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.IRepository;
 using Dominio.Entities;
@@ -66,25 +67,7 @@ namespace Aplicacion.Services
 
         public async Task<FisicoQuimicoDto> CreateAsync(FisicoQuimicoDto dto)
         {
-            var entity = new FisicoQuimico
-            {
-                Fecha = dto.Fecha == default ? DateTime.Now : dto.Fecha,
-                FechaLLegada = dto.FechaLLegada == default ? DateTime.Now : dto.FechaLLegada,
-                FechaAnalisis = dto.FechaAnalisis == default ? DateTime.Now : dto.FechaAnalisis,
-                Procedencia = dto.Procedencia,
-                Ph = dto.Ph,
-                Turbidez = dto.Turbidez,
-                Alcalinidad = dto.Alcalinidad,
-                Dureza = dto.Dureza,
-                Nitritos = dto.Nitritos,
-                Cloruros = dto.Cloruros,
-                Calcio = dto.Calcio,
-                Magnesio = dto.Magnesio,
-                Dbo5 = dto.Dbo5,
-                Cloro = dto.Cloro,
-                MuestraId = dto.MuestraId
-            };
-
+            var entity = FisicoQuimicoFactory.Create(dto);
             var created = await _repo.AddAsync(entity);
             return created.ToDto();
         }
@@ -95,17 +78,7 @@ namespace Aplicacion.Services
             if (entity == null)
                 throw new NotFoundException($"FisicoQuimico con ID {dto.Id} no encontrado.");
 
-            // Actualizar campos editables
-            entity.Ph = dto.Ph;
-            entity.Turbidez = dto.Turbidez;
-            entity.Alcalinidad = dto.Alcalinidad;
-            entity.Dureza = dto.Dureza;
-            entity.Nitritos = dto.Nitritos;
-            entity.Cloruros = dto.Cloruros;
-            entity.Calcio = dto.Calcio;
-            entity.Magnesio = dto.Magnesio;
-            entity.Dbo5 = dto.Dbo5;
-            entity.Cloro = dto.Cloro;
+            FisicoQuimicoFactory.Update(entity, dto);
 
             await _repo.UpdateAsync(entity);
         }
