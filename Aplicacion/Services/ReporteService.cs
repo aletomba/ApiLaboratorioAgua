@@ -1,3 +1,4 @@
+using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.IRepository;
 using Dominio.Exceptions;
@@ -23,82 +24,7 @@ namespace Aplicacion.Services
             if (libro == null)
                 throw new NotFoundException($"Libro de entrada con ID {libroId} no encontrado.");
 
-            var reporte = new ReporteLibroDto
-            {
-                LibroId = libro.Id,
-                FechaRegistro = libro.Fecha,
-                FechaLlegada = libro.FechaLLegada,
-                FechaAnalisis = libro.FechaAnalisis,
-                Procedencia = libro.Procedencia,
-                Observaciones = libro.Observaciones
-            };
-
-            if (libro.Muestras != null)
-            {
-                foreach (var muestraCompleta in libro.Muestras)
-                {
-                    var muestraDto = new ReporteMuestraDto
-                    {
-                        MuestraId = muestraCompleta.Id,
-                        Procedencia = muestraCompleta.Procedencia,
-                        SitioExtraccion = muestraCompleta.Procedencia,
-                        NombreMuestreador = muestraCompleta.NombreMuestreador,
-                        TipoMuestra = muestraCompleta.TipoMuestra switch
-                        {
-                            TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                            TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                            _ => throw new ArgumentException("Tipo de muestra no válido.")
-                        },
-                        ClienteId = muestraCompleta.ClienteId,
-                        ClienteNombre = muestraCompleta.Cliente?.Nombre
-                    };
-
-                    // Adjuntar resultados si existen
-                    if (muestraCompleta.Bacteriologia != null)
-                    {
-                        muestraDto.Bacteriologia = new BacteriologicoDto
-                        {
-                            Id = muestraCompleta.Bacteriologia.Id,
-                            Fecha = muestraCompleta.Bacteriologia.Fecha,
-                            FechaLLegada = muestraCompleta.Bacteriologia.FechaLLegada,
-                            FechaAnalisis = muestraCompleta.Bacteriologia.FechaAnalisis,
-                            Procedencia = muestraCompleta.Bacteriologia.Procedencia,
-                            ColiformesNmp = muestraCompleta.Bacteriologia.ColiformesNmp,
-                            ColiformesFecalesNmp = muestraCompleta.Bacteriologia.ColiformesFecalesNmp,
-                            ColoniasAgar = muestraCompleta.Bacteriologia.ColoniasAgar,
-                            ColiFecalesUfc = muestraCompleta.Bacteriologia.ColiFecalesUfc,
-                            Observaciones = muestraCompleta.Bacteriologia.Observaciones,
-                            MuestraId = muestraCompleta.Bacteriologia.MuestraId
-                        };
-                    }
-
-                    if (muestraCompleta.FisicoQuimico != null)
-                    {
-                        muestraDto.FisicoQuimico = new FisicoQuimicoDto
-                        {
-                            Id = muestraCompleta.FisicoQuimico.Id,
-                            Fecha = muestraCompleta.FisicoQuimico.Fecha,
-                            FechaLLegada = muestraCompleta.FisicoQuimico.FechaLLegada,
-                            FechaAnalisis = muestraCompleta.FisicoQuimico.FechaAnalisis,
-                            Procedencia = muestraCompleta.FisicoQuimico.Procedencia,
-                            Ph = muestraCompleta.FisicoQuimico.Ph,
-                            Turbidez = muestraCompleta.FisicoQuimico.Turbidez,
-                            Alcalinidad = muestraCompleta.FisicoQuimico.Alcalinidad,
-                            Dureza = muestraCompleta.FisicoQuimico.Dureza,
-                            Nitritos = muestraCompleta.FisicoQuimico.Nitritos,
-                            Cloruros = muestraCompleta.FisicoQuimico.Cloruros,
-                            Calcio = muestraCompleta.FisicoQuimico.Calcio,
-                            Magnesio = muestraCompleta.FisicoQuimico.Magnesio,
-                            Dbo5 = muestraCompleta.FisicoQuimico.Dbo5,
-                            MuestraId = muestraCompleta.FisicoQuimico.MuestraId
-                        };
-                    }
-
-                    reporte.Muestras.Add(muestraDto);
-                }
-            }
-
-            return reporte;
+            return libro.ToReporteLibroDto();
         }
 
         public async Task<byte[]> GenerarPdfBytesAsync(int libroId)
