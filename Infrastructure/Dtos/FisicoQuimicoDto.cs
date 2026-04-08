@@ -18,5 +18,6 @@ namespace Infrastructure.Dtos
         public string? Dbo5 { get; set; }
         public string? Cloro { get; set; }
         public int MuestraId { get; set; }
+        public string? MuestraProcedencia { get; set; }
     }
 }

@@ -19,7 +19,8 @@ namespace Aplicacion.Mappers
                 ColoniasAgar = b.ColoniasAgar,
                 ColiFecalesUfc = b.ColiFecalesUfc,
                 Observaciones = b.Observaciones,
-                MuestraId = b.MuestraId
+                MuestraId = b.MuestraId,
+                MuestraProcedencia = b.Muestra?.Procedencia
             };
         }
     }

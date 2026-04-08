@@ -13,5 +13,6 @@ namespace Infrastructure.Dtos
         public string? ColiFecalesUfc { get; set; }
         public string? Observaciones { get; set; }
         public int MuestraId { get; set; }
+        public string? MuestraProcedencia { get; set; }
     }
 }
