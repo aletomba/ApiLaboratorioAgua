@@ -46,6 +46,9 @@ namespace Infrastructure.Repositories
         {
             var query = _context.PlanillasDiarias
                 .Include(p => p.EnsayoJarras)
+                .Include(p => p.LibroEntrada)
+                    .ThenInclude(le => le!.Muestras)
+                        .ThenInclude(m => m.FisicoQuimico)
                 .OrderByDescending(p => p.Fecha);
 
             var total = await query.CountAsync();
@@ -64,6 +67,9 @@ namespace Infrastructure.Repositories
 
             var query = _context.PlanillasDiarias
                 .Include(p => p.EnsayoJarras)
+                .Include(p => p.LibroEntrada)
+                    .ThenInclude(le => le!.Muestras)
+                        .ThenInclude(m => m.FisicoQuimico)
                 .Where(p => p.Fecha.Date >= desdeDate && p.Fecha.Date <= hastaDate)
                 .OrderByDescending(p => p.Fecha);
 
