@@ -24,7 +24,8 @@ namespace Aplicacion.Mappers
                 Magnesio = fq.Magnesio,
                 Dbo5 = fq.Dbo5,
                 Cloro = fq.Cloro,
-                MuestraId = fq.MuestraId
+                MuestraId = fq.MuestraId,
+                MuestraProcedencia = fq.Muestra?.Procedencia
             };
         }
     }
