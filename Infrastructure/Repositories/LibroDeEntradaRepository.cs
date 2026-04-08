@@ -128,9 +128,10 @@ namespace Infrastructure.Repositories
             return (items, totalCount);
         }
 
-        public async Task<LibroDeEntrada> GetByIdAsync(int id)
+        public async Task<LibroDeEntrada?> GetByIdAsync(int id)
         {
             return await _context.LibroEntradas
+                .AsNoTracking()
                 .WithFullMuestras()
                 .FirstOrDefaultAsync(le => le.Id == id);
         }
