@@ -64,6 +64,7 @@ namespace Aplicacion.Services
                             {
                                 c2.Item().Text($"Muestra: {m.SitioExtraccion} - Tipo: {m.TipoMuestra}").Bold();
                                 c2.Item().Text($"Muestreador: {m.NombreMuestreador}");
+                                c2.Item().Text($"Hora Extracción: {m.HoraExtraccion:hh\\:mm}");
                                 c2.Item().Text($"Cliente: {m.ClienteNombre} (ID {m.ClienteId})");
 
                                 if (m.Bacteriologia != null)
