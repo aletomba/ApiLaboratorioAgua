@@ -1,9 +1,7 @@
-using System.Globalization;
 using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.IRepository;
 using Dominio.Exceptions;
-using Dominio.Entities;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -24,7 +22,6 @@ namespace Aplicacion.Services
             var libro = await _libroEntradaRepository.GetByIdAsync(libroId);
             if (libro == null)
                 throw new NotFoundException($"Libro de entrada con ID {libroId} no encontrado.");
-
             return libro.ToReporteLibroDto();
         }
 
@@ -43,21 +40,12 @@ namespace Aplicacion.Services
             var doc = Document.Create(container =>
             {
                 if (bactSamples.Any())
-                {
                     GenerarPaginaBacteriologia(container, reporte, bactSamples);
-                }
-
                 if (fqSamples.Any())
-                {
                     GenerarPaginaFisicoQuimico(container, reporte, fqSamples);
-                }
-
                 if (!bactSamples.Any() && !fqSamples.Any())
-                {
                     GenerarPaginaVacia(container, reporte);
-                }
             });
-
             return doc.GeneratePdf();
         }
 
@@ -78,37 +66,40 @@ namespace Aplicacion.Services
 
                 page.Content().Column(col =>
                 {
-                    col.Item().PaddingTop(10).Text("MUESTRAS").Bold().FontSize(10);
-
-                    col.Item().Table(table =>
+                    int numCols = muestras.Count + 1;
+                    col.Item().Table(tabla =>
                     {
-                        table.ColumnsDefinition(c => { c.ConstantColumn(120); c.RelativeColumn(); });
-                        table.Header(h =>
+                        tabla.ColumnsDefinition(c =>
                         {
-                            h.Cell().Background(Colors.Grey.Darken2).Padding(5).Text("Sitio").FontColor(Colors.White).Bold();
-                            h.Cell().Background(Colors.Grey.Darken2).Padding(5).Text("Resultado").FontColor(Colors.White).Bold();
+                            c.ConstantColumn(100);
+                            for (int i = 0; i < muestras.Count; i++)
+                                c.RelativeColumn();
                         });
 
+                        tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Blue.Darken2).Padding(5)
+                            .Text("METADATOS").Bold().FontColor(Colors.White).FontSize(9);
+
+                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Campo").Bold().FontSize(8);
                         foreach (var m in muestras)
-                        {
-                            var b = m.Bacteriologia;
-                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Column(cx =>
-                            {
-                                cx.Item().Text(m.SitioExtraccion).Bold();
-                                cx.Item().Text($"Muestreador: {m.NombreMuestreador}").FontSize(8);
-                                cx.Item().Text($"Hora: {m.HoraExtraccion:hh\\:mm}").FontSize(8);
-                            });
-                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Column(cx =>
-                            {
-                                cx.Item().Text($"Coliformes NMP: {b?.ColiformesNmp ?? "-"}");
-                                cx.Item().Text($"Coliformes Fecales: {b?.ColiformesFecalesNmp ?? "-"}");
-                                cx.Item().Text($"Colonias Agar: {b?.ColoniasAgar ?? "-"}");
-                                cx.Item().Text($"Coli Fecales UFC: {b?.ColiFecalesUfc ?? "-"}");
-                            });
-                        }
+                            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text(m.SitioExtraccion).Bold().FontSize(8);
+
+                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Muestreador").Bold().FontSize(8);
+                        foreach (var m in muestras)
+                            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text(m.NombreMuestreador ?? "-").FontSize(8);
+
+                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Hora").Bold().FontSize(8);
+                        foreach (var m in muestras)
+                            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text($"{m.HoraExtraccion:hh\\:mm}").FontSize(8);
+
+                        tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Teal.Darken2).Padding(5)
+                            .Text("RESULTADOS").Bold().FontColor(Colors.White).FontSize(9);
+
+                        AgregarFilaBact(tabla, "Coliformes NMP", muestras.Select(m => m.Bacteriologia?.ColiformesNmp ?? "-").ToList());
+                        AgregarFilaBact(tabla, "Coliformes Fecales NMP", muestras.Select(m => m.Bacteriologia?.ColiformesFecalesNmp ?? "-").ToList());
+                        AgregarFilaBact(tabla, "Colonias Agar", muestras.Select(m => m.Bacteriologia?.ColoniasAgar ?? "-").ToList());
+                        AgregarFilaBact(tabla, "Coli Fecales UFC", muestras.Select(m => m.Bacteriologia?.ColiFecalesUfc ?? "-").ToList());
                     });
                 });
-
                 page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
             });
         }
@@ -130,45 +121,61 @@ namespace Aplicacion.Services
 
                 page.Content().Column(col =>
                 {
-                    col.Item().PaddingTop(10).Text("MUESTRAS").Bold().FontSize(10);
-
-                    col.Item().Table(table =>
+                    int numCols = muestras.Count + 1;
+                    col.Item().Table(tabla =>
                     {
-                        table.ColumnsDefinition(c => { c.ConstantColumn(120); c.RelativeColumn(); });
-                        table.Header(h =>
+                        tabla.ColumnsDefinition(c =>
                         {
-                            h.Cell().Background(Colors.Grey.Darken2).Padding(5).Text("Sitio").FontColor(Colors.White).Bold();
-                            h.Cell().Background(Colors.Grey.Darken2).Padding(5).Text("Resultado").FontColor(Colors.White).Bold();
+                            c.ConstantColumn(100);
+                            for (int i = 0; i < muestras.Count; i++)
+                                c.RelativeColumn();
                         });
 
+                        tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Blue.Darken2).Padding(5)
+                            .Text("METADATOS").Bold().FontColor(Colors.White).FontSize(9);
+
+                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Campo").Bold().FontSize(8);
                         foreach (var m in muestras)
-                        {
-                            var f = m.FisicoQuimico;
-                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Column(cx =>
-                            {
-                                cx.Item().Text(m.SitioExtraccion).Bold();
-                                cx.Item().Text($"Muestreador: {m.NombreMuestreador}").FontSize(8);
-                                cx.Item().Text($"Hora: {m.HoraExtraccion:hh\\:mm}").FontSize(8);
-                            });
-                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Column(cx =>
-                            {
-                                cx.Item().Text($"pH: {f?.Ph ?? "-"}");
-                                cx.Item().Text($"Turbidez: {f?.Turbidez ?? "-"} NTU");
-                                cx.Item().Text($"Cloro: {f?.Cloro ?? "-"} mg/L");
-                                cx.Item().Text($"Alcalinidad: {f?.Alcalinidad ?? "-"} mg/L");
-                                cx.Item().Text($"Dureza: {f?.Dureza ?? "-"} mg/L");
-                                cx.Item().Text($"Nitritos: {f?.Nitritos ?? "-"} mg/L");
-                                cx.Item().Text($"Cloruros: {f?.Cloruros ?? "-"} mg/L");
-                                cx.Item().Text($"Calcio: {f?.Calcio ?? "-"} mg/L");
-                                cx.Item().Text($"Magnesio: {f?.Magnesio ?? "-"} mg/L");
-                                cx.Item().Text($"DBO5: {f?.Dbo5 ?? "-"} mg/L");
-                            });
-                        }
+                            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text(m.SitioExtraccion).Bold().FontSize(8);
+
+                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Muestreador").Bold().FontSize(8);
+                        foreach (var m in muestras)
+                            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text(m.NombreMuestreador ?? "-").FontSize(8);
+
+                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Hora").Bold().FontSize(8);
+                        foreach (var m in muestras)
+                            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text($"{m.HoraExtraccion:hh\\:mm}").FontSize(8);
+
+                        tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Green.Darken2).Padding(5)
+                            .Text("RESULTADOS").Bold().FontColor(Colors.White).FontSize(9);
+
+                        AgregarFilaFq(tabla, "pH", muestras.Select(m => m.FisicoQuimico?.Ph ?? "-").ToList());
+                        AgregarFilaFq(tabla, "Turbidez (NTU)", muestras.Select(m => m.FisicoQuimico?.Turbidez ?? "-").ToList());
+                        AgregarFilaFq(tabla, "Alcalinidad", muestras.Select(m => m.FisicoQuimico?.Alcalinidad ?? "-").ToList());
+                        AgregarFilaFq(tabla, "Dureza", muestras.Select(m => m.FisicoQuimico?.Dureza ?? "-").ToList());
+                        AgregarFilaFq(tabla, "Nitritos", muestras.Select(m => m.FisicoQuimico?.Nitritos ?? "-").ToList());
+                        AgregarFilaFq(tabla, "Cloruros", muestras.Select(m => m.FisicoQuimico?.Cloruros ?? "-").ToList());
+                        AgregarFilaFq(tabla, "Calcio", muestras.Select(m => m.FisicoQuimico?.Calcio ?? "-").ToList());
+                        AgregarFilaFq(tabla, "Magnesio", muestras.Select(m => m.FisicoQuimico?.Magnesio ?? "-").ToList());
+                        AgregarFilaFq(tabla, "DBO5", muestras.Select(m => m.FisicoQuimico?.Dbo5 ?? "-").ToList());
                     });
                 });
-
                 page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
             });
+        }
+
+        private static void AgregarFilaBact(dynamic tabla, string etiqueta, List<string> valores)
+        {
+            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
+            foreach (var v in valores)
+                tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
+        }
+
+        private static void AgregarFilaFq(dynamic tabla, string etiqueta, List<string> valores)
+        {
+            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
+            foreach (var v in valores)
+                tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
         }
 
         private static void GenerarPaginaVacia(IDocumentContainer container, ReporteLibroDto reporte)
@@ -179,9 +186,7 @@ namespace Aplicacion.Services
                 page.Margin(20);
                 page.PageColor(Colors.White);
                 page.DefaultTextStyle(x => x.FontSize(12));
-
                 page.Header().Text($"Libro #{reporte.LibroId}").FontSize(20).Bold().AlignCenter();
-
                 page.Content().Column(col =>
                 {
                     col.Item().Text($"Fecha: {reporte.FechaRegistro:yyyy-MM-dd}");
