@@ -1,3 +1,4 @@
+using System.Globalization;
 using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.IRepository;
@@ -35,74 +36,159 @@ namespace Aplicacion.Services
 
         private static byte[] GeneratePdfBytes(ReporteLibroDto reporte)
         {
+            var muestras = reporte.Muestras.ToList();
+            var bactSamples = muestras.Where(m => m.Bacteriologia != null).ToList();
+            var fqSamples = muestras.Where(m => m.FisicoQuimico != null).ToList();
+
             var doc = Document.Create(container =>
             {
-                container.Page(page =>
+                if (bactSamples.Any())
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(20);
-                    page.PageColor(Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(12));
+                    GenerarPaginaBacteriologia(container, reporte, bactSamples);
+                }
 
-                    page.Header()
-                        .Text($"Reporte Libro #{reporte.LibroId}")
-                        .SemiBold().FontSize(20).AlignCenter();
+                if (fqSamples.Any())
+                {
+                    GenerarPaginaFisicoQuimico(container, reporte, fqSamples);
+                }
 
-                    page.Content().PaddingVertical(10).Column(col =>
-                    {
-                        col.Item().Text($"Fecha registro: {reporte.FechaRegistro:yyyy-MM-dd}");
-                        col.Item().Text($"Fecha llegada: {reporte.FechaLlegada:yyyy-MM-dd}");
-                        col.Item().Text($"Fecha análisis: {(reporte.FechaAnalisis.HasValue ? reporte.FechaAnalisis.Value.ToString("yyyy-MM-dd") : "-")}");
-                        col.Item().Text($"Procedencia: {reporte.Procedencia}");
-                        col.Item().Text($"Observaciones: {reporte.Observaciones}");
-
-                        col.Item().PaddingTop(10).Text("Muestras:").Bold();
-
-                        foreach (var m in reporte.Muestras)
-                        {
-                            col.Item().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Column(c2 =>
-                            {
-                                c2.Item().Text($"Muestra: {m.SitioExtraccion} - Tipo: {m.TipoMuestra}").Bold();
-                                c2.Item().Text($"Muestreador: {m.NombreMuestreador}");
-                                c2.Item().Text($"Hora Extracción: {m.HoraExtraccion:hh\\:mm}");
-                                c2.Item().Text($"Cliente: {m.ClienteNombre} (ID {m.ClienteId})");
-
-                                if (m.Bacteriologia != null)
-                                {
-                                    c2.Item().Text("-- Bacteriología --");
-                                    c2.Item().Text($"Coliformes NMP: {m.Bacteriologia.ColiformesNmp}");
-                                    c2.Item().Text($"Coliformes Fecales NMP: {m.Bacteriologia.ColiformesFecalesNmp}");
-                                    c2.Item().Text($"Colonias Agar: {m.Bacteriologia.ColoniasAgar}");
-                                    c2.Item().Text($"Coli Fecales UFC: {m.Bacteriologia.ColiFecalesUfc}");
-                                    c2.Item().Text($"Observaciones: {m.Bacteriologia.Observaciones}");
-                                }
-
-                                if (m.FisicoQuimico != null)
-                                {
-                                    c2.Item().Text("-- Fisicoquímico --");
-                                    c2.Item().Text($"pH: {m.FisicoQuimico.Ph}");
-                                    c2.Item().Text($"Turbidez: {m.FisicoQuimico.Turbidez}");
-                                    c2.Item().Text($"Alcalinidad: {m.FisicoQuimico.Alcalinidad}");
-                                    c2.Item().Text($"Dureza: {m.FisicoQuimico.Dureza}");
-                                    c2.Item().Text($"Nitritos: {m.FisicoQuimico.Nitritos}");
-                                    c2.Item().Text($"Cloruros: {m.FisicoQuimico.Cloruros}");
-                                    c2.Item().Text($"Calcio: {m.FisicoQuimico.Calcio}");
-                                    c2.Item().Text($"Magnesio: {m.FisicoQuimico.Magnesio}");
-                                    c2.Item().Text($"DBO5: {m.FisicoQuimico.Dbo5}");
-                                }
-                            });
-                        }
-                    });
-
-                    page.Footer().AlignCenter().Text(x =>
-                    {
-                        x.Span("Generado el ");
-                        x.Span(DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
-                    });
-                });
+                if (!bactSamples.Any() && !fqSamples.Any())
+                {
+                    GenerarPaginaVacia(container, reporte);
+                }
             });
 
             return doc.GeneratePdf();
+        }
+
+        private static void GenerarPaginaBacteriologia(IDocumentContainer container, ReporteLibroDto reporte, List<ReporteMuestraDto> muestras)
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(15);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(9));
+
+                page.Header().Column(h =>
+                {
+                    h.Item().Text($"ANÁLISIS BACTERIOLÓGICO - Libro #{reporte.LibroId}").FontSize(14).Bold().AlignCenter();
+                    h.Item().Text($"Fecha: {reporte.FechaRegistro:yyyy-MM-dd} | Procedencia: {reporte.Procedencia}").FontSize(10).AlignCenter();
+                });
+
+                page.Content().Column(col =>
+                {
+                    col.Item().PaddingTop(10).Text("MUESTRAS").Bold().FontSize(10);
+
+                    col.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(c => { c.ConstantColumn(120); c.RelativeColumn(); });
+                        table.Header(h =>
+                        {
+                            h.Cell().Background(Colors.Grey.Darken2).Padding(5).Text("Sitio").FontColor(Colors.White).Bold();
+                            h.Cell().Background(Colors.Grey.Darken2).Padding(5).Text("Resultado").FontColor(Colors.White).Bold();
+                        });
+
+                        foreach (var m in muestras)
+                        {
+                            var b = m.Bacteriologia;
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Column(cx =>
+                            {
+                                cx.Item().Text(m.SitioExtraccion).Bold();
+                                cx.Item().Text($"Muestreador: {m.NombreMuestreador}").FontSize(8);
+                                cx.Item().Text($"Hora: {m.HoraExtraccion:hh\\:mm}").FontSize(8);
+                            });
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Column(cx =>
+                            {
+                                cx.Item().Text($"Coliformes NMP: {b?.ColiformesNmp ?? "-"}");
+                                cx.Item().Text($"Coliformes Fecales: {b?.ColiformesFecalesNmp ?? "-"}");
+                                cx.Item().Text($"Colonias Agar: {b?.ColoniasAgar ?? "-"}");
+                                cx.Item().Text($"Coli Fecales UFC: {b?.ColiFecalesUfc ?? "-"}");
+                            });
+                        }
+                    });
+                });
+
+                page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
+            });
+        }
+
+        private static void GenerarPaginaFisicoQuimico(IDocumentContainer container, ReporteLibroDto reporte, List<ReporteMuestraDto> muestras)
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(15);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(9));
+
+                page.Header().Column(h =>
+                {
+                    h.Item().Text($"ANÁLISIS FÍSICOQUÍMICO - Libro #{reporte.LibroId}").FontSize(14).Bold().AlignCenter();
+                    h.Item().Text($"Fecha: {reporte.FechaRegistro:yyyy-MM-dd} | Procedencia: {reporte.Procedencia}").FontSize(10).AlignCenter();
+                });
+
+                page.Content().Column(col =>
+                {
+                    col.Item().PaddingTop(10).Text("MUESTRAS").Bold().FontSize(10);
+
+                    col.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(c => { c.ConstantColumn(120); c.RelativeColumn(); });
+                        table.Header(h =>
+                        {
+                            h.Cell().Background(Colors.Grey.Darken2).Padding(5).Text("Sitio").FontColor(Colors.White).Bold();
+                            h.Cell().Background(Colors.Grey.Darken2).Padding(5).Text("Resultado").FontColor(Colors.White).Bold();
+                        });
+
+                        foreach (var m in muestras)
+                        {
+                            var f = m.FisicoQuimico;
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Column(cx =>
+                            {
+                                cx.Item().Text(m.SitioExtraccion).Bold();
+                                cx.Item().Text($"Muestreador: {m.NombreMuestreador}").FontSize(8);
+                                cx.Item().Text($"Hora: {m.HoraExtraccion:hh\\:mm}").FontSize(8);
+                            });
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Column(cx =>
+                            {
+                                cx.Item().Text($"pH: {f?.Ph ?? "-"}");
+                                cx.Item().Text($"Turbidez: {f?.Turbidez ?? "-"} NTU");
+                                cx.Item().Text($"Cloro: {f?.Cloro ?? "-"} mg/L");
+                                cx.Item().Text($"Alcalinidad: {f?.Alcalinidad ?? "-"} mg/L");
+                                cx.Item().Text($"Dureza: {f?.Dureza ?? "-"} mg/L");
+                                cx.Item().Text($"Nitritos: {f?.Nitritos ?? "-"} mg/L");
+                                cx.Item().Text($"Cloruros: {f?.Cloruros ?? "-"} mg/L");
+                                cx.Item().Text($"Calcio: {f?.Calcio ?? "-"} mg/L");
+                                cx.Item().Text($"Magnesio: {f?.Magnesio ?? "-"} mg/L");
+                                cx.Item().Text($"DBO5: {f?.Dbo5 ?? "-"} mg/L");
+                            });
+                        }
+                    });
+                });
+
+                page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
+            });
+        }
+
+        private static void GenerarPaginaVacia(IDocumentContainer container, ReporteLibroDto reporte)
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(20);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(12));
+
+                page.Header().Text($"Libro #{reporte.LibroId}").FontSize(20).Bold().AlignCenter();
+
+                page.Content().Column(col =>
+                {
+                    col.Item().Text($"Fecha: {reporte.FechaRegistro:yyyy-MM-dd}");
+                    col.Item().Text($"Procedencia: {reporte.Procedencia}");
+                    col.Item().PaddingTop(20).Text("Sin muestras.").Italic();
+                });
+            });
         }
     }
 }
