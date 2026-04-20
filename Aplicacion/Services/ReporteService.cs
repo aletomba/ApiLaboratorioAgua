@@ -79,7 +79,7 @@ namespace Aplicacion.Services
                         tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Blue.Darken2).Padding(5)
                             .Text("METADATOS").Bold().FontColor(Colors.White).FontSize(9);
 
-                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Campo").Bold().FontSize(8);
+                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Sitio Extracción").Bold().FontSize(8);
                         foreach (var m in muestras)
                             tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text(m.SitioExtraccion).Bold().FontSize(8);
 
@@ -134,7 +134,7 @@ namespace Aplicacion.Services
                         tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Blue.Darken2).Padding(5)
                             .Text("METADATOS").Bold().FontColor(Colors.White).FontSize(9);
 
-                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Campo").Bold().FontSize(8);
+                        tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Sitio Extracción").Bold().FontSize(8);
                         foreach (var m in muestras)
                             tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text(m.SitioExtraccion).Bold().FontSize(8);
 
