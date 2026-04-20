@@ -20,6 +20,7 @@ namespace Infrastructure.Dtos
         public string? Procedencia { get; set; }
         public string? SitioExtraccion { get; set; }
         public string? NombreMuestreador { get; set; }
+        public TimeSpan HoraExtraccion { get; set; }
         public TipoDeMuestraDto TipoMuestra { get; set; }
         public int ClienteId { get; set; }
         public string? ClienteNombre { get; set; }
