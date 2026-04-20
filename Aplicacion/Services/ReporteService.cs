@@ -164,14 +164,14 @@ namespace Aplicacion.Services
             });
         }
 
-        private static void AgregarFilaBact(dynamic tabla, string etiqueta, List<string> valores)
+        private static void AgregarFilaBact(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
         {
             tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
             foreach (var v in valores)
                 tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
         }
 
-        private static void AgregarFilaFq(dynamic tabla, string etiqueta, List<string> valores)
+        private static void AgregarFilaFq(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
         {
             tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
             foreach (var v in valores)
