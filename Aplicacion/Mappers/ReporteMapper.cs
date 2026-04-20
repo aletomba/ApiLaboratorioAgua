@@ -13,6 +13,7 @@ namespace Aplicacion.Mappers
                 Procedencia = m.Procedencia,
                 SitioExtraccion = m.Procedencia,
                 NombreMuestreador = m.NombreMuestreador,
+                HoraExtraccion = m.HoraExtraccion,
                 TipoMuestra = m.TipoMuestra switch
                 {
                     TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
