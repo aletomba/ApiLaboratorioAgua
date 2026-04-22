@@ -156,7 +156,21 @@ namespace Infrastructure.Repositories
 
         public async Task UpdateAsync(LibroDeEntrada libroEntrada)
         {
-            _context.LibroEntradas.Update(libroEntrada);
+            var existing = await _context.LibroEntradas
+                .Include(l => l.Muestras)
+                .ThenInclude(m => m.Bacteriologia)
+                .Include(l => l.Muestras)
+                .ThenInclude(m => m.FisicoQuimico)
+                .FirstOrDefaultAsync(l => l.Id == libroEntrada.Id);
+
+            if (existing != null)
+            {
+                _context.Entry(existing).CurrentValues.SetValues(libroEntrada);
+            }
+            else
+            {
+                _context.LibroEntradas.Update(libroEntrada);
+            }
             await _context.SaveChangesAsync();
         }
     }
