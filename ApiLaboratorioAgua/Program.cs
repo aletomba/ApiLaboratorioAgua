@@ -64,6 +64,7 @@ builder.Services.AddDbContext<LabAguaDbContext>(options =>
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IMuestraRepository, MuestraRepository>();
 builder.Services.AddScoped<ILibroEntradaRepository, LibroDeEntradaRepository>();
+builder.Services.AddScoped<ILibroEntradaQueryRepository, LibroDeEntradaRepository>();
 builder.Services.AddScoped<ILibroBacteriologiaRepository, BacteriologicoRepository>();
 builder.Services.AddScoped<ILibroFisicoQuimicoRepository, FisicoQuimicoRepository>();
 builder.Services.AddScoped<IPlanillaDiariaRepository, PlanillaDiariaRepository>();
