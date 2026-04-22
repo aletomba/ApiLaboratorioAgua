@@ -1,5 +1,6 @@
-﻿using Infrastructure.Dtos;
-using Infrastructure.MyExeptions;
+﻿using Aplicacion.Mappers;
+using Infrastructure.Dtos;
+using Dominio.Exceptions;
 using Dominio.Entities;
 using Dominio.IRepository;
 
@@ -109,25 +110,7 @@ namespace Aplicacion.Services
             }
 
             var muestras = await _muestraRepository.GetByClienteIdAsync(clienteId);
-            return muestras.Select(m => new MuestraResponseDto
-            {
-                Id = m.Id,
-                Procedencia = m.Procedencia,
-                NombreMuestreador = m.NombreMuestreador,
-                Latitud = m.Latitud,
-                Longitud = m.Longitud,
-                FechaExtraccion = m.FechaExtraccion,
-                HoraExtraccion = m.HoraExtraccion,
-                TipoMuestra = m.TipoMuestra switch
-                {
-                    TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                    TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                    _ => throw new ArgumentException("Tipo de muestra no válido.")
-                },
-                ClienteId = m.ClienteId,
-                ClienteNombre = m.Cliente?.Nombre,
-                LibroEntradaId = m.LibroEntradaId
-            }).ToList();
+            return muestras.Select(m => m.ToDto()).ToList();
         }
     }
 }

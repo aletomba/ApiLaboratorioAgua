@@ -1,5 +1,7 @@
-﻿using Infrastructure.Dtos;
-using Infrastructure.MyExeptions;
+﻿using Aplicacion.Factories;
+using Aplicacion.Mappers;
+using Infrastructure.Dtos;
+using Dominio.Exceptions;
 using Dominio.Entities;
 using Dominio.IRepository;
 
@@ -25,35 +27,7 @@ namespace Aplicacion.Services
         {
             var (libros, totalCount) = await _libroEntradaRepository.GetAllPagedAsync(page, pageSize);
             
-            var items = libros.Select(le => new LibroDeEntradaResponseDto
-            {
-                Id = le.Id,
-                FechaRegistro = le.Fecha,
-                FechaLlegada = le.FechaLLegada,
-                FechaAnalisis = le.FechaAnalisis,
-                Procedencia = le.Procedencia,
-                SitioExtraccion = le.SitioExtraccion,
-                Observaciones = le.Observaciones,
-                Muestras = le.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            }).ToList();
+            var items = libros.Select(le => le.ToDto()).ToList();
 
             return new PagedResultDto<LibroDeEntradaResponseDto>
             {
@@ -73,85 +47,10 @@ namespace Aplicacion.Services
                 if (cliente == null)
                     throw new NotFoundException($"Cliente con ID {muestraDto.ClienteId} no encontrado.");
 
-                TipoMuestra tipoMuestra = muestraDto.TipoMuestra switch
-                {
-                    TipoDeMuestraDto.Bacteriologica => TipoMuestra.Bacteriologica,
-                    TipoDeMuestraDto.FisicoQuimica => TipoMuestra.FisicoQuimica,
-                    _ => throw new ArgumentException("Tipo de muestra no válido.")
-                };
-
-                var muestra = new Muestra
-                {
-                    Procedencia = muestraDto.SitioExtraccion,                   
-                    NombreMuestreador = muestraDto.NombreMuestreador,
-                    Latitud = muestraDto.Latitud,
-                    Longitud = muestraDto.Longitud,
-                    FechaExtraccion = muestraDto.FechaExtraccion,
-                    HoraExtraccion = muestraDto.HoraExtraccion,
-                    TipoMuestra = tipoMuestra,
-                    ClienteId = muestraDto.ClienteId
-                };
-
-
-                // Asociar libro de análisis según tipo
-                if (tipoMuestra == TipoMuestra.Bacteriologica)
-                {
-                    muestra.Bacteriologia = new Bacteriologico
-                    {
-                        Fecha = libroEntradaDto.Fecha,
-                        FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                        FechaLLegada = libroEntradaDto.FechaLLegada,
-                        Procedencia = libroEntradaDto.Procedencia,
-                        SitioExtraccion = muestraDto.SitioExtraccion,
-                        ColiformesNmp = string.Empty,
-                        ColiformesFecalesNmp = string.Empty,
-                        ColoniasAgar = string.Empty,
-                        ColiFecalesUfc = string.Empty,
-                        Observaciones = string.Empty,
-                        Muestra = muestra
-                    };
-                }
-                else if (tipoMuestra == TipoMuestra.FisicoQuimica)
-                {
-                    muestra.FisicoQuimico = new FisicoQuimico
-                    {
-                        Fecha = libroEntradaDto.Fecha,
-                        FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                        FechaLLegada = libroEntradaDto.FechaLLegada,
-                        Procedencia = libroEntradaDto.Procedencia,
-                        SitioExtraccion = muestraDto.SitioExtraccion,
-                        Ph = string.Empty,
-                        Turbidez = string.Empty,
-                        Alcalinidad = string.Empty,
-                        Dureza = string.Empty,
-                        Nitritos = string.Empty,
-                        Cloruros = string.Empty,
-                        Calcio = string.Empty,
-                        Magnesio = string.Empty,
-                        Dbo5 = string.Empty,
-                        Muestra = muestra
-                    };
-                }
-
-                muestras.Add(muestra);
+                muestras.Add(LibroDeEntradaFactory.CreateMuestra(muestraDto, libroEntradaDto, muestraDto.SitioExtraccion));
             }
 
-            var libroEntrada = new LibroDeEntrada
-            {
-                Fecha = libroEntradaDto.Fecha,
-                FechaLLegada = libroEntradaDto.FechaLLegada,
-                FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                Procedencia = libroEntradaDto.Procedencia,
-                SitioExtraccion = libroEntradaDto.SitioExtraccion ?? string.Empty,
-                Observaciones = libroEntradaDto.Observaciones,
-                Muestras = muestras
-            };
-
-            foreach (var muestra in muestras)
-            {
-                muestra.LibroEntrada = libroEntrada;
-            }
-
+            var libroEntrada = LibroDeEntradaFactory.CreateLibroEntrada(libroEntradaDto, muestras);
             await _libroEntradaRepository.AddAsync(libroEntrada);
         }
 
@@ -163,34 +62,7 @@ namespace Aplicacion.Services
                 throw new NotFoundException($"Libro de entrada con ID {id} no encontrado.");
             }
 
-            return new LibroDeEntradaResponseDto
-            {
-                Id = libroEntrada.Id,
-                FechaRegistro = libroEntrada.Fecha,
-                FechaLlegada = libroEntrada.FechaLLegada,
-                FechaAnalisis = libroEntrada.FechaAnalisis,
-                Procedencia = libroEntrada.Procedencia,               
-                Observaciones = libroEntrada.Observaciones,
-                Muestras = libroEntrada.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            };
+            return libroEntrada.ToDto();
         }
 
         public async Task<List<LibroDeEntradaResponseDto>> GetLibroEntradasByMuestraIdAsync(int muestraId)
@@ -202,68 +74,13 @@ namespace Aplicacion.Services
             }
 
             var libroEntradas = await _libroEntradaRepository.GetByMuestraIdAsync(muestraId);
-            return libroEntradas.Select(le => new LibroDeEntradaResponseDto
-            {
-                Id = le.Id,
-                FechaRegistro = le.Fecha,
-                FechaLlegada = le.FechaLLegada,
-                FechaAnalisis = le.FechaAnalisis,
-                Procedencia = le.Procedencia,           
-                Observaciones = le.Observaciones,
-                Muestras = le.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            }).ToList();
+            return libroEntradas.Select(le => le.ToDto()).ToList();
         }
 
         public async Task<List<LibroDeEntradaResponseDto>> GetLibroEntradasByProcedenciaAsync(string procedencia)
         {
             var libros = await _libroEntradaRepository.GetByProcedenciaAsync(procedencia);
-            return libros.Select(le => new LibroDeEntradaResponseDto
-            {
-                Id = le.Id,
-                FechaRegistro = le.Fecha,
-                FechaLlegada = le.FechaLLegada,
-                FechaAnalisis = le.FechaAnalisis,
-                Procedencia = le.Procedencia,
-                SitioExtraccion = le.SitioExtraccion,
-                Observaciones = le.Observaciones,
-                Muestras = le.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            }).ToList();
+            return libros.Select(le => le.ToDto()).ToList();
         }
 
         public async Task UpdateLibroEntradaAsync(LibroDeEntradaDto libroEntradaDto)
@@ -286,18 +103,18 @@ namespace Aplicacion.Services
             // Actualizar y agregar muestras
             foreach (var muestraDto in muestrasDto)
             {
-                var muestraExistente = muestrasActuales.FirstOrDefault(m => m.Id == muestraDto.Id);
+                // Solo buscar existente si el dto tiene un ID real (> 0).
+                // Si Id es 0, es muestra nueva y siempre va al branch de creación,
+                // evitando que varias muestras nuevas se sobreescriban entre sí.
+                var muestraExistente = muestraDto.Id > 0
+                    ? muestrasActuales.FirstOrDefault(m => m.Id == muestraDto.Id)
+                    : null;
 
                 var cliente = await _clienteRepository.GetByIdAsync(muestraDto.ClienteId);
                 if (cliente == null)
                     throw new NotFoundException($"Cliente con ID {muestraDto.ClienteId} no encontrado.");
 
-                TipoMuestra tipoMuestra = muestraDto.TipoMuestra switch
-                {
-                    TipoDeMuestraDto.Bacteriologica => TipoMuestra.Bacteriologica,
-                    TipoDeMuestraDto.FisicoQuimica => TipoMuestra.FisicoQuimica,
-                    _ => throw new ArgumentException("Tipo de muestra no válido.")
-                };
+                var tipoMuestra = LibroDeEntradaFactory.ParseTipoMuestra(muestraDto.TipoMuestra);
 
                 if (muestraExistente != null)
                 {
@@ -311,107 +128,16 @@ namespace Aplicacion.Services
                     muestraExistente.TipoMuestra = tipoMuestra;
                     muestraExistente.ClienteId = muestraDto.ClienteId;
 
-                    // Actualizar o crear entidad de análisis
-                    if (tipoMuestra == TipoMuestra.Bacteriologica)
-                    {
-                        if (muestraExistente.Bacteriologia == null)
-                        {
-                            muestraExistente.Bacteriologia = new Bacteriologico
-                            {
-                                Fecha = libroEntradaDto.Fecha,
-                                FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                                FechaLLegada = libroEntradaDto.FechaLLegada,
-                                Procedencia = libroEntradaDto.Procedencia,
-                                SitioExtraccion = muestraDto.SitioExtraccion ?? string.Empty,
-                                ColiformesNmp = string.Empty,
-                                ColiformesFecalesNmp = string.Empty,
-                                ColoniasAgar = string.Empty,
-                                ColiFecalesUfc = string.Empty,
-                                Observaciones = string.Empty,
-                                Muestra = muestraExistente
-                            };
-                        }
-                    }
-                    else if (tipoMuestra == TipoMuestra.FisicoQuimica)
-                    {
-                        if (muestraExistente.FisicoQuimico == null)
-                        {
-                            muestraExistente.FisicoQuimico = new FisicoQuimico
-                            {
-                                Fecha = libroEntradaDto.Fecha,
-                                FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                                FechaLLegada = libroEntradaDto.FechaLLegada,
-                                Procedencia = libroEntradaDto.Procedencia,
-                                SitioExtraccion = muestraDto.SitioExtraccion ?? string.Empty,
-                                Ph = string.Empty,
-                                Turbidez = string.Empty,
-                                Alcalinidad = string.Empty,
-                                Dureza = string.Empty,
-                                Nitritos = string.Empty,
-                                Cloruros = string.Empty,
-                                Calcio = string.Empty,
-                                Magnesio = string.Empty,
-                                Dbo5 = string.Empty,
-                                Muestra = muestraExistente
-                            };
-                        }
-                    }
+                    // Crear entidad de análisis si no existe todavía
+                    if (tipoMuestra == TipoMuestra.Bacteriologica && muestraExistente.Bacteriologia == null)
+                        muestraExistente.Bacteriologia = LibroDeEntradaFactory.CreateBacteriologico(libroEntradaDto, muestraDto, muestraExistente);
+                    else if (tipoMuestra == TipoMuestra.FisicoQuimica && muestraExistente.FisicoQuimico == null)
+                        muestraExistente.FisicoQuimico = LibroDeEntradaFactory.CreateFisicoQuimico(libroEntradaDto, muestraDto, muestraExistente);
                 }
                 else
                 {
                     // Agregar nueva muestra
-                    var nuevaMuestra = new Muestra
-                    {
-                        Procedencia = libroEntradaDto.Procedencia,
-                        NombreMuestreador = muestraDto.NombreMuestreador,
-                        Latitud = muestraDto.Latitud,
-                        Longitud = muestraDto.Longitud,
-                        FechaExtraccion = muestraDto.FechaExtraccion,
-                        HoraExtraccion = muestraDto.HoraExtraccion,
-                        TipoMuestra = tipoMuestra,
-                        ClienteId = muestraDto.ClienteId
-                    };
-
-                    if (tipoMuestra == TipoMuestra.Bacteriologica)
-                    {
-                        nuevaMuestra.Bacteriologia = new Bacteriologico
-                        {
-                            Fecha = libroEntradaDto.Fecha,
-                            FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                            FechaLLegada = libroEntradaDto.FechaLLegada,
-                            Procedencia = libroEntradaDto.Procedencia,
-                            SitioExtraccion = muestraDto.SitioExtraccion ?? string.Empty,
-                            ColiformesNmp = string.Empty,
-                            ColiformesFecalesNmp = string.Empty,
-                            ColoniasAgar = string.Empty,
-                            ColiFecalesUfc = string.Empty,
-                            Observaciones = string.Empty,
-                            Muestra = nuevaMuestra
-                        };
-                    }
-                    else if (tipoMuestra == TipoMuestra.FisicoQuimica)
-                    {
-                        nuevaMuestra.FisicoQuimico = new FisicoQuimico
-                        {
-                            Fecha = libroEntradaDto.Fecha,
-                            FechaAnalisis = libroEntradaDto.FechaAnalisis,
-                            FechaLLegada = libroEntradaDto.FechaLLegada,
-                            Procedencia = libroEntradaDto.Procedencia,
-                            SitioExtraccion = muestraDto.SitioExtraccion ?? string.Empty,
-                            Ph = string.Empty,
-                            Turbidez = string.Empty,
-                            Alcalinidad = string.Empty,
-                            Dureza = string.Empty,
-                            Nitritos = string.Empty,
-                            Cloruros = string.Empty,
-                            Calcio = string.Empty,
-                            Magnesio = string.Empty,
-                            Dbo5 = string.Empty,
-                            Muestra = nuevaMuestra
-                        };
-                    }
-
-                    muestrasActuales.Add(nuevaMuestra);
+                    muestrasActuales.Add(LibroDeEntradaFactory.CreateMuestra(muestraDto, libroEntradaDto, libroEntradaDto.Procedencia));
                 }
             }
 
@@ -441,83 +167,27 @@ namespace Aplicacion.Services
         }
 
         public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetLibroEntradasByProcedenciaPagedAsync(
-    string procedencia, int page = 1, int pageSize = 50)
-{
-    var (libros, totalCount) = await _libroEntradaRepository.GetByProcedenciaPagedAsync(procedencia, page, pageSize);
-    
-    var items = libros.Select(le => new LibroDeEntradaResponseDto
-    {
-        Id = le.Id,
-        FechaRegistro = le.Fecha,
-        FechaLlegada = le.FechaLLegada,
-        FechaAnalisis = le.FechaAnalisis,
-        Procedencia = le.Procedencia,
-        SitioExtraccion = le.SitioExtraccion,
-        Observaciones = le.Observaciones,
-        Muestras = le.Muestras?.Select(m => new MuestraResponseDto
+            string procedencia, int page = 1, int pageSize = 50)
         {
-            Id = m.Id,
-            Procedencia = m.Procedencia,
-            NombreMuestreador = m.NombreMuestreador,
-            Latitud = m.Latitud,
-            Longitud = m.Longitud,
-            FechaExtraccion = m.FechaExtraccion,
-            HoraExtraccion = m.HoraExtraccion,
-            TipoMuestra = m.TipoMuestra switch
-            {
-                TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                _ => throw new ArgumentException("Tipo de muestra no válido.")
-            },
-            ClienteId = m.ClienteId,
-            ClienteNombre = m.Cliente?.Nombre,
-            LibroEntradaId = m.LibroEntradaId
-        }).ToList() ?? new List<MuestraResponseDto>()
-    }).ToList();
+            var (libros, totalCount) = await _libroEntradaRepository.GetByProcedenciaPagedAsync(procedencia, page, pageSize);
 
-    return new PagedResultDto<LibroDeEntradaResponseDto>
-    {
-        Items = items,
-        TotalCount = totalCount,
-        Page = page,
-        PageSize = pageSize
-    };
-}
+            var items = libros.Select(le => le.ToDto()).ToList();
+
+            return new PagedResultDto<LibroDeEntradaResponseDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
 
         public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetLibroEntradasByFechaRangoAsync(
             DateTime desde, DateTime hasta, int page = 1, int pageSize = 50)
         {
             var (libros, totalCount) = await _libroEntradaRepository.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
 
-            var items = libros.Select(le => new LibroDeEntradaResponseDto
-            {
-                Id = le.Id,
-                FechaRegistro = le.Fecha,
-                FechaLlegada = le.FechaLLegada,
-                FechaAnalisis = le.FechaAnalisis,
-                Procedencia = le.Procedencia,
-                SitioExtraccion = le.SitioExtraccion,
-                Observaciones = le.Observaciones,
-                Muestras = le.Muestras?.Select(m => new MuestraResponseDto
-                {
-                    Id = m.Id,
-                    Procedencia = m.Procedencia,
-                    NombreMuestreador = m.NombreMuestreador,
-                    Latitud = m.Latitud,
-                    Longitud = m.Longitud,
-                    FechaExtraccion = m.FechaExtraccion,
-                    HoraExtraccion = m.HoraExtraccion,
-                    TipoMuestra = m.TipoMuestra switch
-                    {
-                        TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                        TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                        _ => throw new ArgumentException("Tipo de muestra no válido.")
-                    },
-                    ClienteId = m.ClienteId,
-                    ClienteNombre = m.Cliente?.Nombre,
-                    LibroEntradaId = m.LibroEntradaId
-                }).ToList() ?? new List<MuestraResponseDto>()
-            }).ToList();
+            var items = libros.Select(le => le.ToDto()).ToList();
 
             return new PagedResultDto<LibroDeEntradaResponseDto>
             {

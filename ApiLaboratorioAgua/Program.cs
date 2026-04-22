@@ -37,35 +37,27 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configurar DbContext según el environment
+// Configurar DbContext — SQLite en todos los environments
 builder.Services.AddDbContext<LabAguaDbContext>(options =>
 {
-    if (builder.Environment.IsDevelopment())
+    var configured = builder.Configuration.GetConnectionString("defaultConnection");
+    var fallbackDb = builder.Environment.IsDevelopment() ? "LabAgua_Dev.db" : "LabAgua.db";
+    var dbPath = Path.Combine(AppContext.BaseDirectory, fallbackDb);
+
+    var conn = string.IsNullOrWhiteSpace(configured)
+        ? $"Data Source={dbPath}"
+        : configured;
+
+    // Si la connection string es relativa, anclala a la carpeta del exe
+    if (conn.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
     {
-        // Development: InMemory para rapidez en debug
-        options.UseInMemoryDatabase("LabAguaDb");
+        var value = conn.Substring("Data Source=".Length).Trim();
+        var isRelative = !Path.IsPathRooted(value);
+        if (isRelative)
+            conn = $"Data Source={Path.Combine(AppContext.BaseDirectory, value)}";
     }
-    else
-    {
-        // Production: SQLite para persistencia
-        var configured = builder.Configuration.GetConnectionString("defaultConnection");
-        var dbPath = Path.Combine(AppContext.BaseDirectory, "LabAgua.db");
-        
-        var conn = string.IsNullOrWhiteSpace(configured)
-            ? $"Data Source={dbPath}"
-            : configured;
-        
-        // Si la connection string es relativa, anclala a la carpeta del exe
-        if (conn.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
-        {
-            var value = conn.Substring("Data Source=".Length).Trim();
-            var isRelative = !Path.IsPathRooted(value);
-            if (isRelative)
-                conn = $"Data Source={Path.Combine(AppContext.BaseDirectory, value)}";
-        }
-        
-        options.UseSqlite(conn);
-    }
+
+    options.UseSqlite(conn);
 });
 
 
@@ -84,24 +76,21 @@ builder.Services.AddScoped<ReporteService>();
 builder.Services.AddScoped<PlanillaDiariaService>();
 var app = builder.Build();
 
-// Aplicar migraciones automáticas en Production (SQLite)
-if (!app.Environment.IsDevelopment())
+// Aplicar migraciones automáticas (SQLite en todos los environments)
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<LabAguaDbContext>();
-        if (db.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
-        {
-            db.Database.Migrate();
-        }
-    }
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<LabAguaDbContext>();
+    db.Database.Migrate();
 }
 
-// Seed datos solo en Development
+// Seed datos solo en Development (condicional: solo si la base está vacía)
 if (app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())
     {
+        var db = scope.ServiceProvider.GetRequiredService<LabAguaDbContext>();
+        if (!db.Clientes.Any())
+        {
         var clienteService = scope.ServiceProvider.GetRequiredService<ClienteService>();
         var libroDeEntradaService = scope.ServiceProvider.GetRequiredService<LibroDeEntradaService>();
 
@@ -147,6 +136,7 @@ if (app.Environment.IsDevelopment())
             }
         };
         await libroDeEntradaService.RegistrarLibroEntradaAsync(libroEntradaDto);
+        }
     }
 }
 
@@ -161,32 +151,47 @@ app.UseExceptionHandler(errorApp =>
         int statusCode = 500;
         string message = "Error interno del servidor.";
 
-        if (ex is Infrastructure.MyExeptions.NotFoundException)
+        if (ex is Dominio.Exceptions.NotFoundException)
         {
             statusCode = 404;
             message = ex.Message;
         }
-        else if (ex != null)
+        else if (ex is ArgumentException)
+        {
+            statusCode = 400;
+            message = ex.Message;
+        }
+        else if (ex != null && app.Environment.IsDevelopment())
         {
             message = ex.Message;
         }
 
-        // Recopilar cadena completa de inner exceptions
-        var innerMessages = new List<string>();
-        var inner = ex?.InnerException;
-        while (inner != null)
-        {
-            innerMessages.Add(inner.Message);
-            inner = inner.InnerException;
-        }
-
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new { 
-            status = statusCode, 
-            error = message,
-            innerErrors = innerMessages
-        });
+
+        // innerErrors solo en Development para no exponer detalles internos en producción (OWASP)
+        if (app.Environment.IsDevelopment())
+        {
+            var innerMessages = new List<string>();
+            var inner = ex?.InnerException;
+            while (inner != null)
+            {
+                innerMessages.Add(inner.Message);
+                inner = inner.InnerException;
+            }
+            await context.Response.WriteAsJsonAsync(new {
+                status = statusCode,
+                error = message,
+                innerErrors = innerMessages
+            });
+        }
+        else
+        {
+            await context.Response.WriteAsJsonAsync(new {
+                status = statusCode,
+                error = message
+            });
+        }
     });
 });
 

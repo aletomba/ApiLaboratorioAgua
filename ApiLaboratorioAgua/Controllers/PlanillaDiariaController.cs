@@ -21,6 +21,8 @@ namespace ApiLaboratorioAgua.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 50)
         {
+            if (page < 1 || pageSize < 1 || pageSize > 200)
+                return BadRequest("page debe ser >= 1 y pageSize entre 1 y 200.");
             var result = await _service.GetAllPagedAsync(page, pageSize);
             return Ok(result);
         }
@@ -30,6 +32,7 @@ namespace ApiLaboratorioAgua.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
+            if (result == null) return NotFound(new { error = $"Planilla con ID {id} no encontrada." });
             return Ok(result);
         }
 
@@ -51,6 +54,8 @@ namespace ApiLaboratorioAgua.Controllers
         {
             if (desde > hasta)
                 return BadRequest("La fecha 'desde' no puede ser mayor que 'hasta'.");
+            if (page < 1 || pageSize < 1 || pageSize > 200)
+                return BadRequest("page debe ser >= 1 y pageSize entre 1 y 200.");
 
             var result = await _service.GetByFechaRangoAsync(desde, hasta, page, pageSize);
             return Ok(result);

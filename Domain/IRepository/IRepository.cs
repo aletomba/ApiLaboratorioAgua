@@ -31,7 +31,7 @@ namespace Dominio.IRepository
         Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByProcedenciaPagedAsync(string procedencia, int page, int pageSize);
         Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize);
 
-        Task<LibroDeEntrada> GetByIdAsync(int id);
+        Task<LibroDeEntrada?> GetByIdAsync(int id);
         Task<List<LibroDeEntrada>> GetByProcedenciaAsync(string procedencia);
         Task<List<LibroDeEntrada>> GetByMuestraIdAsync(int muestraId);
         Task UpdateAsync(LibroDeEntrada libroEntrada);
