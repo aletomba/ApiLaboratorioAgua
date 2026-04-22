@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class LibroDeEntradaRepository: ILibroEntradaRepository
+    public class LibroDeEntradaRepository: ILibroEntradaRepository, ILibroEntradaQueryRepository
     {
         private readonly LabAguaDbContext _context;
 
