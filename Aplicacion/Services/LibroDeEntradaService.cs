@@ -1,4 +1,4 @@
-﻿using Aplicacion.Factories;
+using Aplicacion.Factories;
 using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.Exceptions;
@@ -10,22 +10,25 @@ namespace Aplicacion.Services
     public class LibroDeEntradaService
     {
         private readonly ILibroEntradaRepository _libroEntradaRepository;
+        private readonly ILibroEntradaQueryRepository _libroEntradaQueryRepository;
         private readonly IMuestraRepository _muestraRepository;
         private readonly IClienteRepository _clienteRepository;
 
         public LibroDeEntradaService(
             ILibroEntradaRepository libroEntradaRepository,
+            ILibroEntradaQueryRepository libroEntradaQueryRepository,
             IMuestraRepository muestraRepository,
             IClienteRepository clienteRepository)
         {
             _libroEntradaRepository = libroEntradaRepository;
+            _libroEntradaQueryRepository = libroEntradaQueryRepository;
             _muestraRepository = muestraRepository;
             _clienteRepository = clienteRepository;
         }
 
         public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetAllLibroEntradasAsync(int page = 1, int pageSize = 50)
         {
-            var (libros, totalCount) = await _libroEntradaRepository.GetAllPagedAsync(page, pageSize);
+            var (libros, totalCount) = await _libroEntradaQueryRepository.GetAllPagedAsync(page, pageSize);
             
             var items = libros.Select(le => le.ToDto()).ToList();
 
@@ -73,13 +76,13 @@ namespace Aplicacion.Services
                 throw new NotFoundException($"Muestra con ID {muestraId} no encontrada.");
             }
 
-            var libroEntradas = await _libroEntradaRepository.GetByMuestraIdAsync(muestraId);
+            var libroEntradas = await _libroEntradaQueryRepository.GetByMuestraIdAsync(muestraId);
             return libroEntradas.Select(le => le.ToDto()).ToList();
         }
 
         public async Task<List<LibroDeEntradaResponseDto>> GetLibroEntradasByProcedenciaAsync(string procedencia)
         {
-            var libros = await _libroEntradaRepository.GetByProcedenciaAsync(procedencia);
+            var libros = await _libroEntradaQueryRepository.GetByProcedenciaAsync(procedencia);
             return libros.Select(le => le.ToDto()).ToList();
         }
 
@@ -169,7 +172,7 @@ namespace Aplicacion.Services
         public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetLibroEntradasByProcedenciaPagedAsync(
             string procedencia, int page = 1, int pageSize = 50)
         {
-            var (libros, totalCount) = await _libroEntradaRepository.GetByProcedenciaPagedAsync(procedencia, page, pageSize);
+            var (libros, totalCount) = await _libroEntradaQueryRepository.GetByProcedenciaPagedAsync(procedencia, page, pageSize);
 
             var items = libros.Select(le => le.ToDto()).ToList();
 
@@ -185,7 +188,7 @@ namespace Aplicacion.Services
         public async Task<PagedResultDto<LibroDeEntradaResponseDto>> GetLibroEntradasByFechaRangoAsync(
             DateTime desde, DateTime hasta, int page = 1, int pageSize = 50)
         {
-            var (libros, totalCount) = await _libroEntradaRepository.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
+            var (libros, totalCount) = await _libroEntradaQueryRepository.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
 
             var items = libros.Select(le => le.ToDto()).ToList();
 

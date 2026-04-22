@@ -1,4 +1,4 @@
-﻿using Dominio.Entities;
+using Dominio.Entities;
 
 namespace Dominio.IRepository
 {
@@ -24,17 +24,19 @@ namespace Dominio.IRepository
     {
         Task<LibroDeEntrada> AddAsync(LibroDeEntrada libroEntrada);
         Task DeleteAsync(int id);
+        Task<LibroDeEntrada?> GetByIdAsync(int id);
+        Task UpdateAsync(LibroDeEntrada libroEntrada);
+    }
+
+    public interface ILibroEntradaQueryRepository
+    {
+        Task<LibroDeEntrada?> GetByIdAsync(int id);
         Task<List<LibroDeEntrada>> GetAllAsync();
-        
-        // ✨ NUEVOS - Paginados
         Task<(List<LibroDeEntrada> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize);
         Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByProcedenciaPagedAsync(string procedencia, int page, int pageSize);
         Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize);
-
-        Task<LibroDeEntrada?> GetByIdAsync(int id);
         Task<List<LibroDeEntrada>> GetByProcedenciaAsync(string procedencia);
         Task<List<LibroDeEntrada>> GetByMuestraIdAsync(int muestraId);
-        Task UpdateAsync(LibroDeEntrada libroEntrada);
     }
 
     public interface ILibroBacteriologiaRepository
