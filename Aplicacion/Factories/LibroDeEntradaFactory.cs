@@ -1,21 +1,17 @@
 using Dominio.Entities;
 using Infrastructure.Dtos;
+using Aplicacion.Mappers;
 
 namespace Aplicacion.Factories
 {
     public static class LibroDeEntradaFactory
     {
         public static TipoMuestra ParseTipoMuestra(TipoDeMuestraDto tipoDto)
-            => tipoDto switch
-            {
-                TipoDeMuestraDto.Bacteriologica => TipoMuestra.Bacteriologica,
-                TipoDeMuestraDto.FisicoQuimica => TipoMuestra.FisicoQuimica,
-                _ => throw new ArgumentException($"Tipo de muestra no válido: {tipoDto}.")
-            };
+            => tipoDto.ToDomain();
 
         public static Muestra CreateMuestra(MuestraDto muestraDto, LibroDeEntradaDto libroDto, string? procedencia)
         {
-            var tipoMuestra = ParseTipoMuestra(muestraDto.TipoMuestra);
+            var tipoMuestra = muestraDto.TipoMuestra.ToDomain();
             var muestra = new Muestra
             {
                 Procedencia = procedencia,
