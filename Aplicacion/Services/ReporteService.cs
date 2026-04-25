@@ -10,9 +10,9 @@ namespace Aplicacion.Services
 {
     public class ReporteService
     {
-        private readonly ILibroEntradaRepository _libroEntradaRepository;
+        private readonly ILibroEntradaQueryRepository _libroEntradaRepository;
 
-        public ReporteService(ILibroEntradaRepository libroEntradaRepository)
+        public ReporteService(ILibroEntradaQueryRepository libroEntradaRepository)
         {
             _libroEntradaRepository = libroEntradaRepository;
         }

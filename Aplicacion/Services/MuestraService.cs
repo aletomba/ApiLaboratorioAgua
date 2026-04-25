@@ -1,6 +1,6 @@
-﻿using Aplicacion.Mappers;
+using Aplicacion.Mappers;
 using Infrastructure.Dtos;
-using Dominio.Exceptions;
+using Dominio;
 using Dominio.Entities;
 using Dominio.IRepository;
 
@@ -28,19 +28,13 @@ namespace Aplicacion.Services
             _libroFisicoQuimicoRepository = libroFisicoQuimicoRepository;
         }
 
-        public async Task RegistrarMuestraAsync(MuestraDto muestraDto)
+        public async Task<Result<string>> RegistrarMuestraAsync(MuestraDto muestraDto)
         {
             var cliente = await _clienteRepository.GetByIdAsync(muestraDto.ClienteId);
             if (cliente == null)
-                throw new NotFoundException($"Cliente con ID {muestraDto.ClienteId} no encontrado.");
+                return Result<string>.Failure($"Cliente con ID {muestraDto.ClienteId} no encontrado.");
 
-            // Mapear TipoMuestraDto a TipoMuestra
-            TipoMuestra tipoMuestra = muestraDto.TipoMuestra switch
-            {
-                TipoDeMuestraDto.Bacteriologica => TipoMuestra.Bacteriologica,
-                TipoDeMuestraDto.FisicoQuimica => TipoMuestra.FisicoQuimica,
-                _ => throw new ArgumentException("Tipo de muestra no válido.")
-            };
+            var tipoMuestra = TipoMuestraMapper.ToDomain(muestraDto.TipoMuestra);
 
             var muestra = new Muestra
             {
@@ -99,18 +93,17 @@ namespace Aplicacion.Services
 
             // Solo agregas la entidad raíz
             await _libroEntradaRepository.AddAsync(libroEntrada);
+            return Result<string>.Success("Muestra registrada con éxito.");
         }
 
-        public async Task<List<MuestraResponseDto>> GetMuestrasPorClienteAsync(int clienteId)
+        public async Task<Result<List<MuestraResponseDto>>> GetMuestrasPorClienteAsync(int clienteId)
         {
             var cliente = await _clienteRepository.GetByIdAsync(clienteId);
             if (cliente == null)
-            {
-                throw new NotFoundException($"Cliente con ID {clienteId} no encontrado.");
-            }
+                return Result<List<MuestraResponseDto>>.Failure($"Cliente con ID {clienteId} no encontrado.");
 
             var muestras = await _muestraRepository.GetByClienteIdAsync(clienteId);
-            return muestras.Select(m => m.ToDto()).ToList();
+            return Result<List<MuestraResponseDto>>.Success(muestras.Select(m => m.ToDto()).ToList());
         }
     }
 }

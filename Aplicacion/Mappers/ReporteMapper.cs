@@ -14,12 +14,7 @@ namespace Aplicacion.Mappers
                 SitioExtraccion = m.Procedencia,
                 NombreMuestreador = m.NombreMuestreador,
                 HoraExtraccion = m.HoraExtraccion,
-                TipoMuestra = m.TipoMuestra switch
-                {
-                    TipoMuestra.Bacteriologica => TipoDeMuestraDto.Bacteriologica,
-                    TipoMuestra.FisicoQuimica => TipoDeMuestraDto.FisicoQuimica,
-                    _ => throw new ArgumentException("Tipo de muestra no válido.")
-                },
+                TipoMuestra = m.TipoMuestra.ToDto(),
                 ClienteId = m.ClienteId,
                 ClienteNombre = m.Cliente?.Nombre,
                 Bacteriologia = m.Bacteriologia?.ToDto(),
