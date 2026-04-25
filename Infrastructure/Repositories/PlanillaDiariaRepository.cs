@@ -1,3 +1,4 @@
+using Dominio.Constants;
 using Dominio.Entities;
 using Dominio.IRepository;
 using Infrastructure.Data;
@@ -44,6 +45,8 @@ namespace Infrastructure.Repositories
 
         public async Task<(List<PlanillaDiaria> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize)
         {
+            (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
+
             var query = _context.PlanillasDiarias
                 .Include(p => p.EnsayoJarras)
                 .Include(p => p.LibroEntrada)
@@ -62,6 +65,8 @@ namespace Infrastructure.Repositories
 
         public async Task<(List<PlanillaDiaria> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize)
         {
+            (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
+
             var desdeDate = desde.Date;
             var hastaDate = hasta.Date;
 

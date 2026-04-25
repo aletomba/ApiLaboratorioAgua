@@ -1,3 +1,4 @@
+using Dominio.Constants;
 using Dominio.Entities;
 using Dominio.IRepository;
 using Infrastructure.Data;
@@ -55,12 +56,9 @@ namespace Infrastructure.Repositories
         /// <summary>
         /// Obtiene libros de entrada con paginaci�n
         /// </summary>
-        public async Task<(List<LibroDeEntrada> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize)
+public async Task<(List<LibroDeEntrada> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize)
         {
-            // Validar par�metros
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 50;
-            if (pageSize > 500) pageSize = 500; // Limitar m�ximo
+            (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
 
             var query = _context.LibroEntradas
                 .AsNoTracking()
@@ -84,9 +82,7 @@ namespace Infrastructure.Repositories
         /// </summary>
         public async Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByProcedenciaPagedAsync(string procedencia, int page, int pageSize)
         {
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 50;
-            if (pageSize > 500) pageSize = 500;
+            (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
 
             var query = _context.LibroEntradas
                 .AsNoTracking()
@@ -106,9 +102,7 @@ namespace Infrastructure.Repositories
 
         public async Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize)
         {
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 50;
-            if (pageSize > 500) pageSize = 500;
+            (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
 
             var desdeDate = desde.Date;
             var hastaDate = hasta.Date;
