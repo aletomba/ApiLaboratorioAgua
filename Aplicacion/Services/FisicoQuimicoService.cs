@@ -1,6 +1,7 @@
 ﻿using Aplicacion.Factories;
 using Aplicacion.Mappers;
 using Infrastructure.Dtos;
+using Dominio;
 using Dominio.IRepository;
 using Dominio.Entities;
 using Dominio.Exceptions;
@@ -58,11 +59,13 @@ namespace Aplicacion.Services
             };
         }
 
-        public async Task<FisicoQuimicoDto?> GetByIdAsync(int id)
+        public async Task<Result<FisicoQuimicoDto>> GetByIdAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
-            if (entity == null) return null;
-            return entity.ToDto();
+            if (entity == null)
+                return Result<FisicoQuimicoDto>.Failure($"FisicoQuimico con ID {id} no encontrado.");
+
+            return Result<FisicoQuimicoDto>.Success(entity.ToDto());
         }
 
         public async Task<FisicoQuimicoDto> CreateAsync(FisicoQuimicoDto dto)
@@ -72,23 +75,25 @@ namespace Aplicacion.Services
             return created.ToDto();
         }
 
-        public async Task UpdateAsync(FisicoQuimicoEditDto dto)
+        public async Task<Result> UpdateAsync(FisicoQuimicoEditDto dto)
         {
             var entity = await _repo.GetByIdAsync(dto.Id);
             if (entity == null)
-                throw new NotFoundException($"FisicoQuimico con ID {dto.Id} no encontrado.");
+                return Result.Failure($"FisicoQuimico con ID {dto.Id} no encontrado.");
 
             FisicoQuimicoFactory.Update(entity, dto);
-
             await _repo.UpdateAsync(entity);
+            return Result.Success();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<Result> DeleteAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null)
-                throw new NotFoundException($"FisicoQuimico con ID {id} no encontrado.");
+                return Result.Failure($"FisicoQuimico con ID {id} no encontrado.");
+
             await _repo.DeleteAsync(id);
+            return Result.Success();
         }
     }
 }

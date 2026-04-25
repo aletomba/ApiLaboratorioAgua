@@ -54,20 +54,10 @@ namespace ApiLaboratorioAgua.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var dto = await _service.GetByIdAsync(id);
-            if (dto == null)
-                return NotFound();
-            return Ok(dto);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] FisicoQuimicoDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            var result = await _service.GetByIdAsync(id);
+            if (result.IsFailure)
+                return NotFound(new { error = result.Error });
+            return Ok(result.Value);
         }
 
         [HttpPut("{id:int}")]
@@ -76,14 +66,18 @@ namespace ApiLaboratorioAgua.Controllers
             if (id != dto.Id)
                 return BadRequest("El id de la url no coincide con el cuerpo");
 
-            await _service.UpdateAsync(dto);
+            var result = await _service.UpdateAsync(dto);
+            if (result.IsFailure)
+                return BadRequest(new { error = result.Error });
             return Ok(new { message = "FisicoQuimico actualizado" });
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeleteAsync(id);
+            var result = await _service.DeleteAsync(id);
+            if (result.IsFailure)
+                return NotFound(new { error = result.Error });
             return NoContent();
         }
     }
