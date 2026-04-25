@@ -10,9 +10,9 @@ namespace Aplicacion.Services
 {
     public class ReporteService
     {
-        private readonly ILibroEntradaRepository _libroEntradaRepository;
+        private readonly ILibroEntradaQueryRepository _libroEntradaRepository;
 
-        public ReporteService(ILibroEntradaRepository libroEntradaRepository)
+        public ReporteService(ILibroEntradaQueryRepository libroEntradaRepository)
         {
             _libroEntradaRepository = libroEntradaRepository;
         }
@@ -79,6 +79,7 @@ namespace Aplicacion.Services
                         tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Blue.Darken2).Padding(5)
                             .Text("METADATOS").Bold().FontColor(Colors.White).FontSize(9);
 
+<<<<<<< fix/delete-legacy-myexceptions-folder
                         tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Sitio Extracción").Bold().FontSize(8);
                         foreach (var m in muestras)
                             tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text(m.SitioExtraccion).Bold().FontSize(8);
@@ -98,6 +99,42 @@ namespace Aplicacion.Services
                         AgregarFilaBact(tabla, "Coliformes Fecales NMP", muestras.Select(m => m.Bacteriologia?.ColiformesFecalesNmp ?? "-").ToList());
                         AgregarFilaBact(tabla, "Colonias Agar", muestras.Select(m => m.Bacteriologia?.ColoniasAgar ?? "-").ToList());
                         AgregarFilaBact(tabla, "Coli Fecales UFC", muestras.Select(m => m.Bacteriologia?.ColiFecalesUfc ?? "-").ToList());
+=======
+                        foreach (var m in reporte.Muestras)
+                        {
+                            col.Item().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Column(c2 =>
+                            {
+                                c2.Item().Text($"Muestra: {m.SitioExtraccion} - Tipo: {m.TipoMuestra}").Bold();
+                                c2.Item().Text($"Muestreador: {m.NombreMuestreador}");
+                                c2.Item().Text($"Hora Extracción: {m.HoraExtraccion:hh\\:mm}");
+                                c2.Item().Text($"Cliente: {m.ClienteNombre} (ID {m.ClienteId})");
+
+                                if (m.Bacteriologia != null)
+                                {
+                                    c2.Item().Text("-- Bacteriología --");
+                                    c2.Item().Text($"Coliformes NMP: {m.Bacteriologia.ColiformesNmp}");
+                                    c2.Item().Text($"Coliformes Fecales NMP: {m.Bacteriologia.ColiformesFecalesNmp}");
+                                    c2.Item().Text($"Colonias Agar: {m.Bacteriologia.ColoniasAgar}");
+                                    c2.Item().Text($"Coli Fecales UFC: {m.Bacteriologia.ColiFecalesUfc}");
+                                    c2.Item().Text($"Observaciones: {m.Bacteriologia.Observaciones}");
+                                }
+
+                                if (m.FisicoQuimico != null)
+                                {
+                                    c2.Item().Text("-- Fisicoquímico --");
+                                    c2.Item().Text($"pH: {m.FisicoQuimico.Ph}");
+                                    c2.Item().Text($"Turbidez: {m.FisicoQuimico.Turbidez}");
+                                    c2.Item().Text($"Alcalinidad: {m.FisicoQuimico.Alcalinidad}");
+                                    c2.Item().Text($"Dureza: {m.FisicoQuimico.Dureza}");
+                                    c2.Item().Text($"Nitritos: {m.FisicoQuimico.Nitritos}");
+                                    c2.Item().Text($"Cloruros: {m.FisicoQuimico.Cloruros}");
+                                    c2.Item().Text($"Calcio: {m.FisicoQuimico.Calcio}");
+                                    c2.Item().Text($"Magnesio: {m.FisicoQuimico.Magnesio}");
+                                    c2.Item().Text($"DBO5: {m.FisicoQuimico.Dbo5}");
+                                }
+                            });
+                        }
+>>>>>>> main
                     });
                 });
                 page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
