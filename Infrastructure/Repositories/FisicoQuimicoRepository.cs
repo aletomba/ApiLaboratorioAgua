@@ -1,3 +1,4 @@
+using Dominio.Constants;
 using Dominio.Entities;
 using Dominio.IRepository;
 using Infrastructure.Data;
@@ -30,9 +31,7 @@ namespace Infrastructure.Repositories
 
         public async Task<(List<FisicoQuimico> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize)
         {
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 50;
-            if (pageSize > 500) pageSize = 500;
+            (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
 
             var query = _context.FisicoQuimicos
                 .AsNoTracking()
@@ -50,9 +49,7 @@ namespace Infrastructure.Repositories
 
         public async Task<(List<FisicoQuimico> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize)
         {
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 50;
-            if (pageSize > 500) pageSize = 500;
+            (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
 
             var desdeDate = desde.Date;
             var hastaDate = hasta.Date.AddDays(1);
@@ -74,9 +71,7 @@ namespace Infrastructure.Repositories
 
         public async Task<(List<FisicoQuimico> Items, int TotalCount)> GetByClienteIdPagedAsync(int clienteId, int page, int pageSize)
         {
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 50;
-            if (pageSize > 500) pageSize = 500;
+            (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
 
             var query = _context.FisicoQuimicos
                 .AsNoTracking()
