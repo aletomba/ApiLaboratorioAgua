@@ -1,6 +1,7 @@
-﻿using Infrastructure.Dtos;
+using Infrastructure.Dtos;
 using Aplicacion.Services;
 using Microsoft.AspNetCore.Mvc;
+using ApiLaboratorioAgua.Filters;
 
 namespace ApiLaboratorioAgua.Controllers
 {
@@ -18,12 +19,11 @@ namespace ApiLaboratorioAgua.Controllers
         }
 
         [HttpGet]
+        [ValidatePagination]
         public async Task<IActionResult> GetAllLibroEntradas(
             [FromQuery] int page = 1, 
             [FromQuery] int pageSize = 50)
         {
-            if (page < 1 || pageSize < 1 || pageSize > 200)
-                return BadRequest("page debe ser >= 1 y pageSize entre 1 y 200.");
             var result = await _libroEntradaService.GetAllLibroEntradasAsync(page, pageSize);
             return Ok(result);
         }
@@ -32,6 +32,7 @@ namespace ApiLaboratorioAgua.Controllers
         /// Busca libros de entrada por procedencia con paginación
         /// </summary>
         [HttpGet("por-procedencia")]
+        [ValidatePagination]
         public async Task<IActionResult> GetLibroEntradasPorProcedencia(
             [FromQuery] string procedencia,
             [FromQuery] int page = 1,
@@ -39,9 +40,6 @@ namespace ApiLaboratorioAgua.Controllers
         {
             if (string.IsNullOrWhiteSpace(procedencia))
                 return BadRequest("El parámetro 'procedencia' es requerido.");
-            if (page < 1 || pageSize < 1 || pageSize > 200)
-                return BadRequest("page debe ser >= 1 y pageSize entre 1 y 200.");
-
             var result = await _libroEntradaService.GetLibroEntradasByProcedenciaPagedAsync(procedencia, page, pageSize);
             return Ok(result);
         }
@@ -50,6 +48,7 @@ namespace ApiLaboratorioAgua.Controllers
         /// Busca libros de entrada por rango de fechas (fecha de registro)
         /// </summary>
         [HttpGet("por-fecha")]
+        [ValidatePagination]
         public async Task<IActionResult> GetLibroEntradasPorFecha(
             [FromQuery] DateTime desde,
             [FromQuery] DateTime hasta,
@@ -58,9 +57,6 @@ namespace ApiLaboratorioAgua.Controllers
         {
             if (desde > hasta)
                 return BadRequest("La fecha 'desde' no puede ser mayor que 'hasta'.");
-            if (page < 1 || pageSize < 1 || pageSize > 200)
-                return BadRequest("page debe ser >= 1 y pageSize entre 1 y 200.");
-
             var result = await _libroEntradaService.GetLibroEntradasByFechaRangoAsync(desde, hasta, page, pageSize);
             return Ok(result);
         }

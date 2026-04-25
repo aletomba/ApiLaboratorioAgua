@@ -1,7 +1,7 @@
-﻿using Infrastructure.Dtos;
+using Infrastructure.Dtos;
 using Aplicacion.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ApiLaboratorioAgua.Filters;
 
 namespace ApiLaboratorioAgua.Controllers
 {
@@ -17,17 +17,17 @@ namespace ApiLaboratorioAgua.Controllers
         }
 
         [HttpGet]
+        [ValidatePagination]
         public async Task<IActionResult> GetAll(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 50)
         {
-            if (page < 1 || pageSize < 1 || pageSize > 200)
-                return BadRequest("page debe ser >= 1 y pageSize entre 1 y 200.");
             var result = await _service.GetAllPagedAsync(page, pageSize);
             return Ok(result);
         }
 
         [HttpGet("por-fecha")]
+        [ValidatePagination]
         public async Task<IActionResult> GetPorFecha(
             [FromQuery] DateTime desde,
             [FromQuery] DateTime hasta,
@@ -36,20 +36,17 @@ namespace ApiLaboratorioAgua.Controllers
         {
             if (desde > hasta)
                 return BadRequest("La fecha 'desde' no puede ser mayor que 'hasta'.");
-            if (page < 1 || pageSize < 1 || pageSize > 200)
-                return BadRequest("page debe ser >= 1 y pageSize entre 1 y 200.");
             var result = await _service.GetByFechaRangoPagedAsync(desde, hasta, page, pageSize);
             return Ok(result);
         }
 
         [HttpGet("por-cliente/{clienteId:int}")]
+        [ValidatePagination]
         public async Task<IActionResult> GetPorCliente(
             int clienteId,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 50)
         {
-            if (page < 1 || pageSize < 1 || pageSize > 200)
-                return BadRequest("page debe ser >= 1 y pageSize entre 1 y 200.");
             var result = await _service.GetByClienteIdPagedAsync(clienteId, page, pageSize);
             return Ok(result);
         }
