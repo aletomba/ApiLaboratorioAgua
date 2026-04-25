@@ -1,4 +1,4 @@
-﻿using Aplicacion.Mappers;
+using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.Exceptions;
 using Dominio.Entities;
@@ -35,12 +35,7 @@ namespace Aplicacion.Services
                 throw new NotFoundException($"Cliente con ID {muestraDto.ClienteId} no encontrado.");
 
             // Mapear TipoMuestraDto a TipoMuestra
-            TipoMuestra tipoMuestra = muestraDto.TipoMuestra switch
-            {
-                TipoDeMuestraDto.Bacteriologica => TipoMuestra.Bacteriologica,
-                TipoDeMuestraDto.FisicoQuimica => TipoMuestra.FisicoQuimica,
-                _ => throw new ArgumentException("Tipo de muestra no válido.")
-            };
+            var tipoMuestra = muestraDto.TipoMuestra.ToDomain();
 
             var muestra = new Muestra
             {
