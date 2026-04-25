@@ -1,9 +1,9 @@
 ﻿using Aplicacion.Factories;
 using Aplicacion.Mappers;
 using Infrastructure.Dtos;
+using Dominio;
 using Dominio.IRepository;
 using Dominio.Entities;
-using Dominio.Exceptions;
 
 namespace Aplicacion.Services
 {
@@ -58,11 +58,12 @@ namespace Aplicacion.Services
             };
         }
 
-        public async Task<BacteriologicoDto?> GetByIdAsync(int id)
+        public async Task<Result<BacteriologicoDto>> GetByIdAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
-            if (entity == null) return null;
-            return entity.ToDto();
+            if (entity == null)
+                return Result<BacteriologicoDto>.Failure($"Bacteriologico con ID {id} no encontrado.");
+            return Result<BacteriologicoDto>.Success(entity.ToDto());
         }
 
         public async Task<BacteriologicoDto> CreateAsync(BacteriologicoDto dto)
@@ -72,23 +73,24 @@ namespace Aplicacion.Services
             return created.ToDto();
         }
 
-        public async Task UpdateAsync(BacteriologicoDto dto)
+        public async Task<Result> UpdateAsync(BacteriologicoDto dto)
         {
             var entity = await _repo.GetByIdAsync(dto.Id);
             if (entity == null)
-                throw new NotFoundException($"Bacteriologico con ID {dto.Id} no encontrado.");
+                return Result.Failure($"Bacteriologico con ID {dto.Id} no encontrado.");
 
             BacteriologicoFactory.Update(entity, dto);
-
             await _repo.UpdateAsync(entity);
+            return Result.Success();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<Result> DeleteAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null)
-                throw new NotFoundException($"Bacteriologico con ID {id} no encontrado.");
+                return Result.Failure($"Bacteriologico con ID {id} no encontrado.");
             await _repo.DeleteAsync(id);
+            return Result.Success();
         }
     }
 }
