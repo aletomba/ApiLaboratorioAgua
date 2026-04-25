@@ -54,9 +54,10 @@ namespace ApiLaboratorioAgua.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var dto = await _service.GetByIdAsync(id);
-            if (dto == null) return NotFound();
-            return Ok(dto);
+            var result = await _service.GetByIdAsync(id);
+            if (result.IsFailure)
+                return NotFound(new { error = result.Error });
+            return Ok(result.Value);
         }
 
         [HttpPost]
@@ -71,15 +72,19 @@ namespace ApiLaboratorioAgua.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] BacteriologicoDto dto)
         {
             if (id != dto.Id) return BadRequest("El id de la url no coincide con el cuerpo");
-            await _service.UpdateAsync(dto);
+            var result = await _service.UpdateAsync(dto);
+            if (result.IsFailure)
+                return BadRequest(new { error = result.Error });
             return Ok(new { message = "Bacteriologico actualizado" });
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeleteAsync(id);
-            return Ok(new { message = "Bacteriologico eliminado" });
+            var result = await _service.DeleteAsync(id);
+            if (result.IsFailure)
+                return NotFound(new { error = result.Error });
+            return NoContent();
         }
     }
 }
