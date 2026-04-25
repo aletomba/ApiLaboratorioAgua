@@ -16,7 +16,6 @@ namespace ApiLaboratorioAgua.Controllers
             _service = service;
         }
 
-        /// <summary>Obtiene todas las planillas paginadas.</summary>
         [HttpGet]
         [ValidatePagination]
         public async Task<IActionResult> GetAll(
@@ -27,24 +26,24 @@ namespace ApiLaboratorioAgua.Controllers
             return Ok(result);
         }
 
-        /// <summary>Obtiene una planilla por ID.</summary>
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            if (result == null) return NotFound(new { error = $"Planilla con ID {id} no encontrada." });
-            return Ok(result);
+            if (result.IsFailure)
+                return NotFound(new { error = result.Error });
+            return Ok(result.Value);
         }
 
-        /// <summary>Obtiene la planilla de una fecha específica (yyyy-MM-dd).</summary>
         [HttpGet("por-fecha")]
         public async Task<IActionResult> GetByFecha([FromQuery] DateTime fecha)
         {
             var result = await _service.GetByFechaAsync(fecha);
-            return Ok(result);
+            if (result.IsFailure)
+                return NotFound(new { error = result.Error });
+            return Ok(result.Value);
         }
 
-        /// <summary>Busca planillas por rango de fechas (inclusivo).</summary>
         [HttpGet("por-rango")]
         [ValidatePagination]
         public async Task<IActionResult> GetByFechaRango(
@@ -59,10 +58,6 @@ namespace ApiLaboratorioAgua.Controllers
             return Ok(result);
         }
 
-        /// <summary>
-        /// Registra una nueva planilla diaria.
-        /// Crea automáticamente el LibroDeEntrada con una muestra por punto de muestreo.
-        /// </summary>
         [HttpPost("registrar")]
         public async Task<IActionResult> Registrar(
             [FromBody] PlanillaDiariaDto dto,
@@ -75,23 +70,25 @@ namespace ApiLaboratorioAgua.Controllers
             return Ok(new { message = "Planilla registrada con éxito.", data = result });
         }
 
-        /// <summary>Actualiza una planilla existente (análisis y ensayo de jarras).</summary>
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] PlanillaDiariaDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _service.UpdateAsync(id, dto);
+            var result = await _service.UpdateAsync(id, dto);
+            if (result.IsFailure)
+                return BadRequest(new { error = result.Error });
             return Ok(new { message = "Planilla actualizada con éxito." });
         }
 
-        /// <summary>Elimina una planilla.</summary>
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeleteAsync(id);
-            return Ok(new { message = "Planilla eliminada con éxito." });
+            var result = await _service.DeleteAsync(id);
+            if (result.IsFailure)
+                return NotFound(new { error = result.Error });
+            return NoContent();
         }
     }
 }
