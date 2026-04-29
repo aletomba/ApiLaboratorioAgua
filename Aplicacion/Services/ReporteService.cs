@@ -2,7 +2,6 @@ using Aplicacion.Mappers;
 using Infrastructure.Dtos;
 using Dominio.IRepository;
 using Dominio.Exceptions;
-using Dominio.Entities;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -23,7 +22,6 @@ namespace Aplicacion.Services
             var libro = await _libroEntradaRepository.GetByIdAsync(libroId);
             if (libro == null)
                 throw new NotFoundException($"Libro de entrada con ID {libroId} no encontrado.");
-
             return libro.ToReporteLibroDto();
         }
 
@@ -148,9 +146,40 @@ namespace Aplicacion.Services
 
                     page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
                 });
+                page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
             });
+        }
 
-            return doc.GeneratePdf();
+        private static void AgregarFilaBact(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
+        {
+            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
+            foreach (var v in valores)
+                tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
+        }
+
+        private static void AgregarFilaFq(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
+        {
+            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
+            foreach (var v in valores)
+                tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
+        }
+
+        private static void GenerarPaginaVacia(IDocumentContainer container, ReporteLibroDto reporte)
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(20);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(12));
+                page.Header().Text($"Libro #{reporte.LibroId}").FontSize(20).Bold().AlignCenter();
+                page.Content().Column(col =>
+                {
+                    col.Item().Text($"Fecha: {reporte.FechaRegistro:yyyy-MM-dd}");
+                    col.Item().Text($"Procedencia: {reporte.Procedencia}");
+                    col.Item().PaddingTop(20).Text("Sin muestras.").Italic();
+                });
+            });
         }
 
         private static void AgregarFilaBact(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
