@@ -35,84 +35,136 @@ namespace Aplicacion.Services
 
         private static byte[] GeneratePdfBytes(ReporteLibroDto reporte)
         {
+            var muestras = reporte.Muestras.ToList();
+            var bactSamples = muestras.Where(m => m.Bacteriologia != null).ToList();
+            var fqSamples = muestras.Where(m => m.FisicoQuimico != null).ToList();
+
             var doc = Document.Create(container =>
             {
                 container.Page(page =>
                 {
-                    page.Size(PageSizes.A4);
+                    page.Size(PageSizes.A4.Landscape());
                     page.Margin(20);
                     page.PageColor(Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(12));
+                    page.DefaultTextStyle(x => x.FontSize(9));
 
-                    page.Header()
-                        .Text($"Reporte Libro #{reporte.LibroId}")
-                        .SemiBold().FontSize(20).AlignCenter();
-
-                    page.Content().PaddingVertical(10).Column(col =>
+                    page.Header().Column(h =>
                     {
-                        col.Item().Text($"Fecha registro: {reporte.FechaRegistro:yyyy-MM-dd}");
-                        col.Item().Text($"Fecha llegada: {reporte.FechaLlegada:yyyy-MM-dd}");
-                        col.Item().Text($"Fecha análisis: {(reporte.FechaAnalisis.HasValue ? reporte.FechaAnalisis.Value.ToString("yyyy-MM-dd") : "-")}");
-                        col.Item().Text($"Procedencia: {reporte.Procedencia}");
-                        col.Item().Text($"Observaciones: {reporte.Observaciones}");
+                        h.Item().Text($"REPORTE LIBRO #{reporte.LibroId}").FontSize(14).Bold().AlignCenter();
+                        h.Item().Text($"Fecha llegada: {reporte.FechaLlegada:yyyy-MM-dd} | Fecha análisis: {(reporte.FechaAnalisis.HasValue ? reporte.FechaAnalisis.Value.ToString("yyyy-MM-dd") : "-")} | Procedencia: {reporte.Procedencia}").FontSize(10).AlignCenter();
+                        if (!string.IsNullOrEmpty(reporte.Observaciones))
+                            h.Item().Text($"Observaciones: {reporte.Observaciones}").FontSize(9).AlignCenter();
+                    });
 
-                        col.Item().PaddingTop(10).Text("Muestras:").Bold();
-
-                        foreach (var m in reporte.Muestras)
+                    page.Content().Column(col =>
+                    {
+                        if (bactSamples.Any())
                         {
-                            col.Item().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Column(c2 =>
+                            col.Item().Text("ANÁLISIS BACTERIOLÓGICO").FontSize(12).Bold().AlignCenter();
+                            col.Item().PaddingVertical(5).Table(tabla =>
                             {
-                                c2.Item().Text($"Muestra: {m.SitioExtraccion} - Tipo: {m.TipoMuestra}").Bold();
-                                AddField(c2, $"Muestreador: {m.NombreMuestreador}");
-                                AddField(c2, $"Hora Extracción: {m.HoraExtraccion:hh\\:mm}");
-                                AddField(c2, $"Cliente: {m.ClienteNombre} (ID {m.ClienteId})");
-
-                                if (m.Bacteriologia != null)
+                                int numCols = bactSamples.Count + 1;
+                                tabla.ColumnsDefinition(c =>
                                 {
-                                    c2.Item().PaddingTop(3).Text("-- Bacteriología --").Bold();
-                                    AddField(c2, $"Coliformes NMP: {m.Bacteriologia.ColiformesNmp}");
-                                    AddField(c2, $"Coliformes Fecales NMP: {m.Bacteriologia.ColiformesFecalesNmp}");
-                                    AddField(c2, $"Colonias Agar: {m.Bacteriologia.ColoniasAgar}");
-                                    AddField(c2, $"Coli Fecales UFC: {m.Bacteriologia.ColiFecalesUfc}");
-                                    AddField(c2, $"Observaciones: {m.Bacteriologia.Observaciones}");
-                                }
+                                    c.ConstantColumn(100);
+                                    for (int i = 0; i < bactSamples.Count; i++)
+                                        c.RelativeColumn();
+                                });
 
-                                if (m.FisicoQuimico != null)
-                                {
-                                    c2.Item().PaddingTop(3).Text("-- Fisicoquímico --").Bold();
-                                    AddField(c2, $"pH: {m.FisicoQuimico.Ph}");
-                                    AddField(c2, $"Turbidez: {m.FisicoQuimico.Turbidez}");
-                                    AddField(c2, $"Alcalinidad: {m.FisicoQuimico.Alcalinidad}");
-                                    AddField(c2, $"Dureza: {m.FisicoQuimico.Dureza}");
-                                    AddField(c2, $"Nitritos: {m.FisicoQuimico.Nitritos}");
-                                    AddField(c2, $"Cloruros: {m.FisicoQuimico.Cloruros}");
-                                    AddField(c2, $"Calcio: {m.FisicoQuimico.Calcio}");
-                                    AddField(c2, $"Magnesio: {m.FisicoQuimico.Magnesio}");
-                                    AddField(c2, $"DBO5: {m.FisicoQuimico.Dbo5}");
-                                    AddField(c2, $"Cloro: {m.FisicoQuimico.Cloro}");
-                                }
+                                tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Grey.Lighten3).Padding(3)
+                                    .Text("METADATOS").Bold().FontSize(8);
+
+                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Sitio Extracción").Bold().FontSize(8);
+                                foreach (var m in bactSamples)
+                                    tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text(m.SitioExtraccion).FontSize(8);
+
+                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Muestreador").Bold().FontSize(8);
+                                foreach (var m in bactSamples)
+                                    tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text(m.NombreMuestreador ?? "-").FontSize(8);
+
+                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Hora").Bold().FontSize(8);
+                                foreach (var m in bactSamples)
+                                    tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text($"{m.HoraExtraccion:hh\\:mm}").FontSize(8);
+
+                                tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Blue.Darken2).Padding(5)
+                                    .Text("RESULTADOS BACTERIOLÓGICOS").Bold().FontColor(Colors.White).FontSize(9);
+
+                                AgregarFilaBact(tabla, "Coliformes NMP", bactSamples.Select(m => m.Bacteriologia?.ColiformesNmp ?? "-").ToList());
+                                AgregarFilaBact(tabla, "Coliformes Fecales NMP", bactSamples.Select(m => m.Bacteriologia?.ColiformesFecalesNmp ?? "-").ToList());
+                                AgregarFilaBact(tabla, "Colonias Agar", bactSamples.Select(m => m.Bacteriologia?.ColoniasAgar ?? "-").ToList());
+                                AgregarFilaBact(tabla, "Coli Fecales UFC", bactSamples.Select(m => m.Bacteriologia?.ColiFecalesUfc ?? "-").ToList());
                             });
+                        }
+
+                        if (fqSamples.Any())
+                        {
+                            col.Item().PaddingTop(10).Text("ANÁLISIS FÍSICOQUÍMICO").FontSize(12).Bold().AlignCenter();
+                            col.Item().PaddingVertical(5).Table(tabla =>
+                            {
+                                int numCols = fqSamples.Count + 1;
+                                tabla.ColumnsDefinition(c =>
+                                {
+                                    c.ConstantColumn(100);
+                                    for (int i = 0; i < fqSamples.Count; i++)
+                                        c.RelativeColumn();
+                                });
+
+                                tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Grey.Lighten3).Padding(3)
+                                    .Text("METADATOS").Bold().FontSize(8);
+
+                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Sitio Extracción").Bold().FontSize(8);
+                                foreach (var m in fqSamples)
+                                    tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text(m.SitioExtraccion).FontSize(8);
+
+                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Muestreador").Bold().FontSize(8);
+                                foreach (var m in fqSamples)
+                                    tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text(m.NombreMuestreador ?? "-").FontSize(8);
+
+                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Hora").Bold().FontSize(8);
+                                foreach (var m in fqSamples)
+                                    tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text($"{m.HoraExtraccion:hh\\:mm}").FontSize(8);
+
+                                tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Green.Darken2).Padding(5)
+                                    .Text("RESULTADOS FÍSICOQUÍMICOS").Bold().FontColor(Colors.White).FontSize(9);
+
+                                AgregarFilaFq(tabla, "pH", fqSamples.Select(m => m.FisicoQuimico?.Ph ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Turbidez (NTU)", fqSamples.Select(m => m.FisicoQuimico?.Turbidez ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Alcalinidad", fqSamples.Select(m => m.FisicoQuimico?.Alcalinidad ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Dureza", fqSamples.Select(m => m.FisicoQuimico?.Dureza ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Nitritos", fqSamples.Select(m => m.FisicoQuimico?.Nitritos ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Cloruros", fqSamples.Select(m => m.FisicoQuimico?.Cloruros ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Calcio", fqSamples.Select(m => m.FisicoQuimico?.Calcio ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Magnesio", fqSamples.Select(m => m.FisicoQuimico?.Magnesio ?? "-").ToList());
+                                AgregarFilaFq(tabla, "DBO5", fqSamples.Select(m => m.FisicoQuimico?.Dbo5 ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Cloro", fqSamples.Select(m => m.FisicoQuimico?.Cloro ?? "-").ToList());
+                            });
+                        }
+
+                        if (!bactSamples.Any() && !fqSamples.Any())
+                        {
+                            col.Item().PaddingTop(20).Text("Sin muestras con resultados.").Italic();
                         }
                     });
 
-                    page.Footer().AlignCenter().Text(x =>
-                    {
-                        x.Span("Generado el ");
-                        x.Span(DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
-                    });
+                    page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
                 });
             });
 
             return doc.GeneratePdf();
         }
 
-        private static void AddField(ColumnDescriptor column, string text)
+        private static void AgregarFilaBact(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
         {
-            column.Item().Text(text);
-            column.Item()
-                .PaddingVertical(2)
-                .LineHorizontal(1)
-                .LineColor(Colors.Grey.Lighten3);
+            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
+            foreach (var v in valores)
+                tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
+        }
+
+        private static void AgregarFilaFq(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
+        {
+            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
+            foreach (var v in valores)
+                tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
         }
     }
 }
