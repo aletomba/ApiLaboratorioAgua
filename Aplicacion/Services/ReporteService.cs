@@ -89,6 +89,7 @@ namespace Aplicacion.Services
                                     c2.Item().Text($"Calcio: {m.FisicoQuimico.Calcio}");
                                     c2.Item().Text($"Magnesio: {m.FisicoQuimico.Magnesio}");
                                     c2.Item().Text($"DBO5: {m.FisicoQuimico.Dbo5}");
+                                    c2.Item().Text($"Cloro: {m.FisicoQuimico.Cloro}");
                                 }
                             });
                         }
