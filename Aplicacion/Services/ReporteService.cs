@@ -79,7 +79,6 @@ namespace Aplicacion.Services
                         tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Blue.Darken2).Padding(5)
                             .Text("METADATOS").Bold().FontColor(Colors.White).FontSize(9);
 
-<<<<<<< fix/delete-legacy-myexceptions-folder
                         tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text("Sitio Extracción").Bold().FontSize(8);
                         foreach (var m in muestras)
                             tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).AlignCenter().Text(m.SitioExtraccion).Bold().FontSize(8);
@@ -99,43 +98,6 @@ namespace Aplicacion.Services
                         AgregarFilaBact(tabla, "Coliformes Fecales NMP", muestras.Select(m => m.Bacteriologia?.ColiformesFecalesNmp ?? "-").ToList());
                         AgregarFilaBact(tabla, "Colonias Agar", muestras.Select(m => m.Bacteriologia?.ColoniasAgar ?? "-").ToList());
                         AgregarFilaBact(tabla, "Coli Fecales UFC", muestras.Select(m => m.Bacteriologia?.ColiFecalesUfc ?? "-").ToList());
-=======
-                        foreach (var m in reporte.Muestras)
-                        {
-                            col.Item().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Column(c2 =>
-                            {
-                                c2.Item().Text($"Muestra: {m.SitioExtraccion} - Tipo: {m.TipoMuestra}").Bold();
-                                AddField(c2, $"Muestreador: {m.NombreMuestreador}");
-                                AddField(c2, $"Hora Extracción: {m.HoraExtraccion:hh\\:mm}");
-                                AddField(c2, $"Cliente: {m.ClienteNombre} (ID {m.ClienteId})");
-
-                                if (m.Bacteriologia != null)
-                                {
-                                    c2.Item().PaddingTop(3).Text("-- Bacteriología --").Bold();
-                                    AddField(c2, $"Coliformes NMP: {m.Bacteriologia.ColiformesNmp}");
-                                    AddField(c2, $"Coliformes Fecales NMP: {m.Bacteriologia.ColiformesFecalesNmp}");
-                                    AddField(c2, $"Colonias Agar: {m.Bacteriologia.ColoniasAgar}");
-                                    AddField(c2, $"Coli Fecales UFC: {m.Bacteriologia.ColiFecalesUfc}");
-                                    AddField(c2, $"Observaciones: {m.Bacteriologia.Observaciones}");
-                                }
-
-                                if (m.FisicoQuimico != null)
-                                {
-                                    c2.Item().PaddingTop(3).Text("-- Fisicoquímico --").Bold();
-                                    AddField(c2, $"pH: {m.FisicoQuimico.Ph}");
-                                    AddField(c2, $"Turbidez: {m.FisicoQuimico.Turbidez}");
-                                    AddField(c2, $"Alcalinidad: {m.FisicoQuimico.Alcalinidad}");
-                                    AddField(c2, $"Dureza: {m.FisicoQuimico.Dureza}");
-                                    AddField(c2, $"Nitritos: {m.FisicoQuimico.Nitritos}");
-                                    AddField(c2, $"Cloruros: {m.FisicoQuimico.Cloruros}");
-                                    AddField(c2, $"Calcio: {m.FisicoQuimico.Calcio}");
-                                    AddField(c2, $"Magnesio: {m.FisicoQuimico.Magnesio}");
-                                    AddField(c2, $"DBO5: {m.FisicoQuimico.Dbo5}");
-                                    AddField(c2, $"Cloro: {m.FisicoQuimico.Cloro}");
-                                }
-                            });
-                        }
->>>>>>> main
                     });
                 });
                 page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
