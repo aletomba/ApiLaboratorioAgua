@@ -63,33 +63,33 @@ namespace Aplicacion.Services
                             col.Item().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Column(c2 =>
                             {
                                 c2.Item().Text($"Muestra: {m.SitioExtraccion} - Tipo: {m.TipoMuestra}").Bold();
-                                c2.Item().Text($"Muestreador: {m.NombreMuestreador}");
-                                c2.Item().Text($"Hora Extracción: {m.HoraExtraccion:hh\\:mm}");
-                                c2.Item().Text($"Cliente: {m.ClienteNombre} (ID {m.ClienteId})");
+                                AddField(c2, $"Muestreador: {m.NombreMuestreador}");
+                                AddField(c2, $"Hora Extracción: {m.HoraExtraccion:hh\\:mm}");
+                                AddField(c2, $"Cliente: {m.ClienteNombre} (ID {m.ClienteId})");
 
                                 if (m.Bacteriologia != null)
                                 {
-                                    c2.Item().Text("-- Bacteriología --");
-                                    c2.Item().Text($"Coliformes NMP: {m.Bacteriologia.ColiformesNmp}");
-                                    c2.Item().Text($"Coliformes Fecales NMP: {m.Bacteriologia.ColiformesFecalesNmp}");
-                                    c2.Item().Text($"Colonias Agar: {m.Bacteriologia.ColoniasAgar}");
-                                    c2.Item().Text($"Coli Fecales UFC: {m.Bacteriologia.ColiFecalesUfc}");
-                                    c2.Item().Text($"Observaciones: {m.Bacteriologia.Observaciones}");
+                                    c2.Item().PaddingTop(3).Text("-- Bacteriología --").Bold();
+                                    AddField(c2, $"Coliformes NMP: {m.Bacteriologia.ColiformesNmp}");
+                                    AddField(c2, $"Coliformes Fecales NMP: {m.Bacteriologia.ColiformesFecalesNmp}");
+                                    AddField(c2, $"Colonias Agar: {m.Bacteriologia.ColoniasAgar}");
+                                    AddField(c2, $"Coli Fecales UFC: {m.Bacteriologia.ColiFecalesUfc}");
+                                    AddField(c2, $"Observaciones: {m.Bacteriologia.Observaciones}");
                                 }
 
                                 if (m.FisicoQuimico != null)
                                 {
-                                    c2.Item().Text("-- Fisicoquímico --");
-                                    c2.Item().Text($"pH: {m.FisicoQuimico.Ph}");
-                                    c2.Item().Text($"Turbidez: {m.FisicoQuimico.Turbidez}");
-                                    c2.Item().Text($"Alcalinidad: {m.FisicoQuimico.Alcalinidad}");
-                                    c2.Item().Text($"Dureza: {m.FisicoQuimico.Dureza}");
-                                    c2.Item().Text($"Nitritos: {m.FisicoQuimico.Nitritos}");
-                                    c2.Item().Text($"Cloruros: {m.FisicoQuimico.Cloruros}");
-                                    c2.Item().Text($"Calcio: {m.FisicoQuimico.Calcio}");
-                                    c2.Item().Text($"Magnesio: {m.FisicoQuimico.Magnesio}");
-                                    c2.Item().Text($"DBO5: {m.FisicoQuimico.Dbo5}");
-                                    c2.Item().Text($"Cloro: {m.FisicoQuimico.Cloro}");
+                                    c2.Item().PaddingTop(3).Text("-- Fisicoquímico --").Bold();
+                                    AddField(c2, $"pH: {m.FisicoQuimico.Ph}");
+                                    AddField(c2, $"Turbidez: {m.FisicoQuimico.Turbidez}");
+                                    AddField(c2, $"Alcalinidad: {m.FisicoQuimico.Alcalinidad}");
+                                    AddField(c2, $"Dureza: {m.FisicoQuimico.Dureza}");
+                                    AddField(c2, $"Nitritos: {m.FisicoQuimico.Nitritos}");
+                                    AddField(c2, $"Cloruros: {m.FisicoQuimico.Cloruros}");
+                                    AddField(c2, $"Calcio: {m.FisicoQuimico.Calcio}");
+                                    AddField(c2, $"Magnesio: {m.FisicoQuimico.Magnesio}");
+                                    AddField(c2, $"DBO5: {m.FisicoQuimico.Dbo5}");
+                                    AddField(c2, $"Cloro: {m.FisicoQuimico.Cloro}");
                                 }
                             });
                         }
@@ -104,6 +104,15 @@ namespace Aplicacion.Services
             });
 
             return doc.GeneratePdf();
+        }
+
+        private static void AddField(ColumnDescriptor column, string text)
+        {
+            column.Item().Text(text);
+            column.Item()
+                .PaddingVertical(2)
+                .LineHorizontal(1)
+                .LineColor(Colors.Grey.Lighten3);
         }
     }
 }
