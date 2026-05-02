@@ -80,9 +80,17 @@ namespace Aplicacion.Services
                                 foreach (var m in bactSamples)
                                     tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text(m.NombreMuestreador ?? "-").FontSize(8);
 
-                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Hora").Bold().FontSize(8);
+                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Hora Extracción").Bold().FontSize(8);
                                 foreach (var m in bactSamples)
                                     tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text($"{m.HoraExtraccion:hh\\:mm}").FontSize(8);
+
+                                var hasObs = bactSamples.Any(m => !string.IsNullOrEmpty(m.Bacteriologia?.Observaciones));
+                                if (hasObs)
+                                {
+                                    tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Observaciones de Muestra").Bold().FontSize(8);
+                                    foreach (var m in bactSamples)
+                                        tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text(m.Bacteriologia?.Observaciones ?? "-").FontSize(8);
+                                }
 
                                 tabla.Cell().ColumnSpan((uint)numCols).Background(Colors.Blue.Darken2).Padding(5)
                                     .Text("RESULTADOS BACTERIOLÓGICOS").Bold().FontColor(Colors.White).FontSize(9);
@@ -118,7 +126,7 @@ namespace Aplicacion.Services
                                 foreach (var m in fqSamples)
                                     tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text(m.NombreMuestreador ?? "-").FontSize(8);
 
-                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Hora").Bold().FontSize(8);
+                                tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Hora Extracción").Bold().FontSize(8);
                                 foreach (var m in fqSamples)
                                     tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text($"{m.HoraExtraccion:hh\\:mm}").FontSize(8);
 
@@ -146,8 +154,9 @@ namespace Aplicacion.Services
 
                     page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
                 });
-                page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
             });
+
+            return doc.GeneratePdf();
         }
 
         private static void AgregarFilaBact(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
@@ -180,20 +189,6 @@ namespace Aplicacion.Services
                     col.Item().PaddingTop(20).Text("Sin muestras.").Italic();
                 });
             });
-        }
-
-        private static void AgregarFilaBact(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
-        {
-            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
-            foreach (var v in valores)
-                tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
-        }
-
-        private static void AgregarFilaFq(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
-        {
-            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
-            foreach (var v in valores)
-                tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
         }
     }
 }
