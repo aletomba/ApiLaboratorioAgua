@@ -15,6 +15,7 @@ namespace Aplicacion.Mappers
                 FechaAnalisis = le.FechaAnalisis,
                 Procedencia = le.Procedencia,
                 SitioExtraccion = le.SitioExtraccion,
+                NroAnalisis = le.NroAnalisis,
                 Observaciones = le.Observaciones,
                 Muestras = le.Muestras?.Select(m => m.ToDto()).ToList()
                             ?? new List<MuestraResponseDto>()
