@@ -10,6 +10,7 @@ namespace Infrastructure.Dtos
         public DateTime FechaLlegada { get; set; }
         public DateTime? FechaAnalisis { get; set; }
         public string? Procedencia { get; set; }
+        public string? NroAnalisis { get; set; }
         public string? Observaciones { get; set; }
         public List<ReporteMuestraDto> Muestras { get; set; } = new List<ReporteMuestraDto>();
     }
