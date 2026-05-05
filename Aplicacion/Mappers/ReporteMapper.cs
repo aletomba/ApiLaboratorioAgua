@@ -31,6 +31,7 @@ namespace Aplicacion.Mappers
                 FechaLlegada = libro.FechaLLegada,
                 FechaAnalisis = libro.FechaAnalisis,
                 Procedencia = libro.Procedencia,
+                NroAnalisis = libro.NroAnalisis,
                 Observaciones = libro.Observaciones
             };
 
