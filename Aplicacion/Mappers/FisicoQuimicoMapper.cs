@@ -19,6 +19,8 @@ namespace Aplicacion.Mappers
                 Alcalinidad = fq.Alcalinidad,
                 Dureza = fq.Dureza,
                 Nitritos = fq.Nitritos,
+                Nitratos = fq.Nitratos,
+                Amonio = fq.Amonio,
                 Cloruros = fq.Cloruros,
                 Calcio = fq.Calcio,
                 Magnesio = fq.Magnesio,

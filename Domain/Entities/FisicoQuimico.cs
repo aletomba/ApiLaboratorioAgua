@@ -8,7 +8,9 @@
         public string? Turbidez { get; set; }
         public string? Alcalinidad { get; set; }
         public string? Dureza { get; set; }
-        public string? Nitritos { get; set; }       
+        public string? Nitritos { get; set; }
+        public string? Nitratos { get; set; }
+        public string? Amonio { get; set; }
         public string? Cloruros { get; set; }
         public string? Calcio { get; set; }
         public string? Magnesio { get; set; }

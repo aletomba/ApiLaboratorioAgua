@@ -17,6 +17,8 @@ namespace Aplicacion.Factories
                 Alcalinidad = dto.Alcalinidad,
                 Dureza = dto.Dureza,
                 Nitritos = dto.Nitritos,
+                Nitratos = dto.Nitratos,
+                Amonio = dto.Amonio,
                 Cloruros = dto.Cloruros,
                 Calcio = dto.Calcio,
                 Magnesio = dto.Magnesio,
@@ -32,6 +34,8 @@ namespace Aplicacion.Factories
             entity.Alcalinidad = dto.Alcalinidad;
             entity.Dureza = dto.Dureza;
             entity.Nitritos = dto.Nitritos;
+            entity.Nitratos = dto.Nitratos;
+            entity.Amonio = dto.Amonio;
             entity.Cloruros = dto.Cloruros;
             entity.Calcio = dto.Calcio;
             entity.Magnesio = dto.Magnesio;
