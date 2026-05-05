@@ -50,6 +50,8 @@ namespace Aplicacion.Services
                     {
                         h.Item().Text($"REPORTE LIBRO #{reporte.LibroId}").FontSize(14).Bold().AlignCenter();
                         h.Item().Text($"Fecha llegada: {reporte.FechaLlegada:yyyy-MM-dd} | Fecha análisis: {(reporte.FechaAnalisis.HasValue ? reporte.FechaAnalisis.Value.ToString("yyyy-MM-dd") : "-")} | Procedencia: {reporte.Procedencia}").FontSize(10).AlignCenter();
+                        if (!string.IsNullOrEmpty(reporte.NroAnalisis))
+                            h.Item().Text($"N° Análisis: {reporte.NroAnalisis}").FontSize(10).Bold().AlignCenter();
                         if (!string.IsNullOrEmpty(reporte.Observaciones))
                             h.Item().Text($"Observaciones: {reporte.Observaciones}").FontSize(9).AlignCenter();
                     });
