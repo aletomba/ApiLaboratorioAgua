@@ -81,6 +81,7 @@ namespace Aplicacion.Factories
                 FechaAnalisis = dto.FechaAnalisis,
                 Procedencia = dto.Procedencia,
                 SitioExtraccion = dto.SitioExtraccion ?? string.Empty,
+                NroAnalisis = dto.NroAnalisis,
                 Observaciones = dto.Observaciones,
                 Muestras = muestras
             };

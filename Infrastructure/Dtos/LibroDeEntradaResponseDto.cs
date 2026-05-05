@@ -14,6 +14,7 @@ namespace Infrastructure.Dtos
         public DateTime? FechaAnalisis { get; set; }
         public string? Procedencia { get; set; }     
         public string? SitioExtraccion { get; set; }    
+        public string? NroAnalisis { get; set; }
         public string? Observaciones { get; set; }
         public List<MuestraResponseDto> Muestras { get; set; } = new List<MuestraResponseDto>();
     }
