@@ -87,7 +87,7 @@ namespace Aplicacion.Services
                                 var hasObs = bactSamples.Any(m => !string.IsNullOrEmpty(m.Bacteriologia?.Observaciones));
                                 if (hasObs)
                                 {
-                                    tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Observaciones de Muestra").Bold().FontSize(8);
+                                    tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Observaciones").Bold().FontSize(8);
                                     foreach (var m in bactSamples)
                                         tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).AlignCenter().Text(m.Bacteriologia?.Observaciones ?? "-").FontSize(8);
                                 }
@@ -138,6 +138,8 @@ namespace Aplicacion.Services
                                 AgregarFilaFq(tabla, "Alcalinidad", fqSamples.Select(m => m.FisicoQuimico?.Alcalinidad ?? "-").ToList());
                                 AgregarFilaFq(tabla, "Dureza", fqSamples.Select(m => m.FisicoQuimico?.Dureza ?? "-").ToList());
                                 AgregarFilaFq(tabla, "Nitritos", fqSamples.Select(m => m.FisicoQuimico?.Nitritos ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Nitratos", fqSamples.Select(m => m.FisicoQuimico?.Nitratos ?? "-").ToList());
+                                AgregarFilaFq(tabla, "Amonio", fqSamples.Select(m => m.FisicoQuimico?.Amonio ?? "-").ToList());
                                 AgregarFilaFq(tabla, "Cloruros", fqSamples.Select(m => m.FisicoQuimico?.Cloruros ?? "-").ToList());
                                 AgregarFilaFq(tabla, "Calcio", fqSamples.Select(m => m.FisicoQuimico?.Calcio ?? "-").ToList());
                                 AgregarFilaFq(tabla, "Magnesio", fqSamples.Select(m => m.FisicoQuimico?.Magnesio ?? "-").ToList());
