@@ -98,6 +98,7 @@ namespace Aplicacion.Services
             libro.FechaAnalisis = libroEntradaDto.FechaAnalisis;
             libro.Procedencia = libroEntradaDto.Procedencia;
             libro.SitioExtraccion = libroEntradaDto.SitioExtraccion ?? string.Empty;
+            libro.NroAnalisis = libroEntradaDto.NroAnalisis;
             libro.Observaciones = libroEntradaDto.Observaciones;
 
             var muestrasActuales = libro.Muestras ?? new List<Muestra>();
