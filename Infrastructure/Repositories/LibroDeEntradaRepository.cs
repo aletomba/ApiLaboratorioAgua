@@ -160,6 +160,23 @@ public async Task<(List<LibroDeEntrada> Items, int TotalCount)> GetAllPagedAsync
             if (existing != null)
             {
                 _context.Entry(existing).CurrentValues.SetValues(libroEntrada);
+
+                // Sincronizar muestras: actualizar existentes y agregar nuevas (Id == 0)
+                foreach (var muestra in libroEntrada.Muestras)
+                {
+                    var existingMuestra = existing.Muestras
+                        .FirstOrDefault(m => m.Id == muestra.Id && m.Id != 0);
+
+                    if (existingMuestra == null)
+                    {
+                        // Muestra nueva: agregar a la colección trackeada → EF la insertará
+                        existing.Muestras.Add(muestra);
+                    }
+                    else
+                    {
+                        _context.Entry(existingMuestra).CurrentValues.SetValues(muestra);
+                    }
+                }
             }
             else
             {
