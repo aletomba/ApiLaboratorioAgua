@@ -171,9 +171,16 @@ namespace Aplicacion.Services
 
         private static void AgregarFila(QuestPDF.Fluent.TableDescriptor tabla, string etiqueta, List<string> valores)
         {
-            tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(etiqueta).Bold().FontSize(8);
+            tabla.Cell()
+                .Background(Colors.Grey.Lighten3)
+                .BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
+                .PaddingVertical(5).PaddingHorizontal(6)
+                .Text(etiqueta).Bold().FontSize(8);
             foreach (var v in valores)
-                tabla.Cell().Padding(3).AlignCenter().Text(v).FontSize(8);
+                tabla.Cell()
+                    .BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
+                    .PaddingVertical(5).PaddingHorizontal(6)
+                    .AlignCenter().Text(v).FontSize(8);
         }
     }
 }
