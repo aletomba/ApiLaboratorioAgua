@@ -160,6 +160,29 @@ public async Task<(List<LibroDeEntrada> Items, int TotalCount)> GetAllPagedAsync
             if (existing != null)
             {
                 _context.Entry(existing).CurrentValues.SetValues(libroEntrada);
+
+                // Sincronizar muestras: actualizar existentes y agregar nuevas (Id == 0)
+                foreach (var muestra in libroEntrada.Muestras)
+                {
+                    var existingMuestra = existing.Muestras
+                        .FirstOrDefault(m => m.Id == muestra.Id && muestra.Id > 0);
+
+                    if (existingMuestra == null)
+                    {
+                        // Muestra nueva: agregar a la colección trackeada → EF la insertará
+                        existing.Muestras.Add(muestra);
+                    }
+                    else
+                    {
+                        _context.Entry(existingMuestra).CurrentValues.SetValues(muestra);
+
+                        // Sincronizar análisis si la muestra existente no lo tenía aún
+                        if (muestra.Bacteriologia != null && existingMuestra.Bacteriologia == null)
+                            existingMuestra.Bacteriologia = muestra.Bacteriologia;
+                        if (muestra.FisicoQuimico != null && existingMuestra.FisicoQuimico == null)
+                            existingMuestra.FisicoQuimico = muestra.FisicoQuimico;
+                    }
+                }
             }
             else
             {
