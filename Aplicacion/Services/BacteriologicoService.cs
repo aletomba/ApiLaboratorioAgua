@@ -89,7 +89,7 @@ namespace Aplicacion.Services
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null)
                 return Result.Failure($"Bacteriologico con ID {id} no encontrado.");
-            await _repo.DeleteAsync(id);
+            await _repo.DeleteAsync(entity);
             return Result.Success();
         }
     }

@@ -101,10 +101,8 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Bacteriologico entity)
         {
-            var entity = await _context.Bacteriologicos.FindAsync(id);
-            if (entity == null) return;
             _context.Bacteriologicos.Remove(entity);
             await _context.SaveChangesAsync();
         }
