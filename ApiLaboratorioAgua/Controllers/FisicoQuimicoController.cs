@@ -60,6 +60,13 @@ namespace ApiLaboratorioAgua.Controllers
             return Ok(result.Value);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] FisicoQuimicoDto dto)
+        {
+            var created = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] FisicoQuimicoEditDto dto)
         {

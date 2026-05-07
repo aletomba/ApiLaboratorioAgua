@@ -47,3 +47,6 @@ desktop.ini
 .DS_Store
 
 .vscode/
+
+# MCP config con secrets
+.opencode/mcp.json
