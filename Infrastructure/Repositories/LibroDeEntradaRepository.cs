@@ -105,11 +105,11 @@ public async Task<(List<LibroDeEntrada> Items, int TotalCount)> GetAllPagedAsync
             (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
 
             var desdeDate = desde.Date;
-            var hastaDate = hasta.Date;
+            var hastaDate = hasta.Date.AddDays(1);
 
             var query = _context.LibroEntradas
                 .AsNoTracking()
-                .Where(le => le.Fecha.Date >= desdeDate && le.Fecha.Date <= hastaDate)
+                .Where(le => le.Fecha >= desdeDate && le.Fecha < hastaDate)
                 .WithFullMuestras();
 
             var totalCount = await query.CountAsync();
