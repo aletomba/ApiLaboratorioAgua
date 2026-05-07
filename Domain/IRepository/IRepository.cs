@@ -48,7 +48,7 @@ namespace Dominio.IRepository
         Task<(List<Bacteriologico> Items, int TotalCount)> GetByClienteIdPagedAsync(int clienteId, int page, int pageSize);
         Task<Bacteriologico?> GetByIdAsync(int id);
         Task UpdateAsync(Bacteriologico bacteriologico);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(Bacteriologico entity);
     }
 
     public interface ILibroFisicoQuimicoRepository
@@ -60,7 +60,7 @@ namespace Dominio.IRepository
         Task<(List<FisicoQuimico> Items, int TotalCount)> GetByClienteIdPagedAsync(int clienteId, int page, int pageSize);
         Task<FisicoQuimico?> GetByIdAsync(int id);
         Task UpdateAsync(FisicoQuimico fisicoQuimico);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(FisicoQuimico entity);
     }
 
     public interface IPlanillaDiariaRepository

@@ -92,7 +92,7 @@ namespace Aplicacion.Services
             if (entity == null)
                 return Result.Failure($"FisicoQuimico con ID {id} no encontrado.");
 
-            await _repo.DeleteAsync(id);
+            await _repo.DeleteAsync(entity);
             return Result.Success();
         }
     }
