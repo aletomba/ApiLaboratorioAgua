@@ -51,7 +51,7 @@ namespace Infrastructure.Repositories
               .ToListAsync();
         }
 
-        public async Task<Muestra> GetByIdAsync(int id)
+        public async Task<Muestra?> GetByIdAsync(int id)
         {
             return await _context.Muestras
             .Include(m => m.Cliente)

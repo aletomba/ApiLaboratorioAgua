@@ -5,7 +5,7 @@ namespace Dominio.IRepository
     public interface IClienteRepository
     {
         Task<Cliente> AddAsync(Cliente cliente);
-        Task<Cliente> GetByIdAsync(int id);       
+        Task<Cliente?> GetByIdAsync(int id);       
         Task<List<Cliente>> GetAllAsync();
         Task UpdateAsync(Cliente cliente);
         Task DeleteAsync(int id);
@@ -14,7 +14,7 @@ namespace Dominio.IRepository
     public interface IMuestraRepository
     {
         Task<Muestra> AddAsync(Muestra muestra);
-        Task<Muestra> GetByIdAsync(int id);
+        Task<Muestra?> GetByIdAsync(int id);
         Task<List<Muestra>> GetByClienteIdAsync(int clienteId); // Nuevo método
         Task DeleteAsync(int id);
     }
