@@ -34,13 +34,14 @@ namespace Infrastructure.Repositories
 
         public async Task<PlanillaDiaria?> GetByFechaAsync(DateTime fecha)
         {
-            var fechaSolo = fecha.Date;
+            var fechaDesde = fecha.Date;
+            var fechaHasta = fechaDesde.AddDays(1);
             return await _context.PlanillasDiarias
                 .Include(p => p.EnsayoJarras)
                 .Include(p => p.LibroEntrada)
                     .ThenInclude(le => le!.Muestras)
                         .ThenInclude(m => m.FisicoQuimico)
-                .FirstOrDefaultAsync(p => p.Fecha.Date == fechaSolo);
+                .FirstOrDefaultAsync(p => p.Fecha >= fechaDesde && p.Fecha < fechaHasta);
         }
 
         public async Task<(List<PlanillaDiaria> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize)
@@ -68,14 +69,14 @@ namespace Infrastructure.Repositories
             (page, pageSize) = PaginationDefaults.Normalize(page, pageSize);
 
             var desdeDate = desde.Date;
-            var hastaDate = hasta.Date;
+            var hastaDate = hasta.Date.AddDays(1);
 
             var query = _context.PlanillasDiarias
                 .Include(p => p.EnsayoJarras)
                 .Include(p => p.LibroEntrada)
                     .ThenInclude(le => le!.Muestras)
                         .ThenInclude(m => m.FisicoQuimico)
-                .Where(p => p.Fecha.Date >= desdeDate && p.Fecha.Date <= hastaDate)
+                .Where(p => p.Fecha >= desdeDate && p.Fecha < hastaDate)
                 .OrderByDescending(p => p.Fecha);
 
             var total = await query.CountAsync();
