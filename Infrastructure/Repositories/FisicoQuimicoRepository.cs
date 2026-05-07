@@ -102,14 +102,10 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(FisicoQuimico entity)
         {
-            var entity = await _context.FisicoQuimicos.FindAsync(id);
-            if (entity != null)
-            {
-                _context.FisicoQuimicos.Remove(entity);
-                await _context.SaveChangesAsync();
-            }
+            _context.FisicoQuimicos.Remove(entity);
+            await _context.SaveChangesAsync();
         }
     }
 }
