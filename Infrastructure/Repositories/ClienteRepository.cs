@@ -21,7 +21,7 @@ namespace Infrastructure.Repositories
             return cliente;
         }
 
-        public async Task<Cliente> GetByIdAsync(int id)
+        public async Task<Cliente?> GetByIdAsync(int id)
         {
             return await _context.Clientes
                 .AsNoTracking()
