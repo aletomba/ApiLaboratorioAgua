@@ -31,6 +31,36 @@ namespace Aplicacion.Services
             return GeneratePdfBytes(reporte);
         }
 
+        public async Task<List<ReporteResumenLibroDto>> GenerarReporteMultipleAsync(List<int> libroIds)
+        {
+            var libros = await _libroEntradaRepository.GetByIdsAsync(libroIds);
+            if (libros.Count == 0)
+                throw new NotFoundException("Ningún libro de entrada encontrado con los IDs proporcionados.");
+
+            return libros.Select(libro =>
+            {
+                var tipos = libro.Muestras?
+                    .Select(m => m.TipoMuestra == Dominio.Entities.TipoMuestra.Bacteriologica ? "Bacteriológica" : "Fisicoquímica")
+                    .Distinct()
+                    .OrderBy(t => t)
+                    .ToList() ?? new List<string>();
+
+                return new ReporteResumenLibroDto
+                {
+                    LibroId = libro.Id,
+                    FechaAnalisis = libro.FechaAnalisis,
+                    Procedencia = libro.Procedencia,
+                    TiposAnalisis = tipos
+                };
+            }).ToList();
+        }
+
+        public async Task<byte[]> GenerarPdfMultipleBytesAsync(List<int> libroIds)
+        {
+            var reportes = await GenerarReporteMultipleAsync(libroIds);
+            return GeneratePdfMultipleBytes(reportes);
+        }
+
         private static byte[] GeneratePdfBytes(ReporteLibroDto reporte)
         {
             var muestras = reporte.Muestras.ToList();
@@ -153,6 +183,60 @@ namespace Aplicacion.Services
                         if (!bactSamples.Any() && !fqSamples.Any())
                         {
                             col.Item().PaddingTop(20).Text("Sin muestras con resultados.").Italic();
+                        }
+                    });
+
+                    page.Footer().AlignCenter().Text($"Generado: {DateTime.Now:yyyy-MM-dd HH:mm}");
+                });
+            });
+
+            return doc.GeneratePdf();
+        }
+
+        private static byte[] GeneratePdfMultipleBytes(List<ReporteResumenLibroDto> reportes)
+        {
+            var doc = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4.Landscape());
+                    page.Margin(20);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(9));
+
+                    page.Header().Column(h =>
+                    {
+                        h.Item().Text("REPORTE MÚLTIPLE DE LIBROS DE ENTRADA").FontSize(14).Bold().AlignCenter();
+                        h.Item().PaddingBottom(5).Text($"Total de libros seleccionados: {reportes.Count}").FontSize(10).AlignCenter();
+                    });
+
+                    page.Content().Table(tabla =>
+                    {
+                        tabla.ColumnsDefinition(c =>
+                        {
+                            c.ConstantColumn(40);
+                            c.ConstantColumn(120);
+                            c.RelativeColumn();
+                            c.RelativeColumn();
+                        });
+
+                        tabla.Cell().ColumnSpan(4).Background(Colors.Grey.Lighten3).Padding(5)
+                            .Text("RESUMEN").Bold().FontSize(10);
+
+                        tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("#").Bold().FontSize(8);
+                        tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Fecha Análisis").Bold().FontSize(8);
+                        tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Procedencia").Bold().FontSize(8);
+                        tabla.Cell().Background(Colors.Grey.Lighten1).Padding(3).Text("Tipo(s) de Análisis").Bold().FontSize(8);
+
+                        int index = 1;
+                        foreach (var r in reportes)
+                        {
+                            var bg = index % 2 == 0 ? Colors.Grey.Lighten5 : Colors.White;
+                            tabla.Cell().Background(bg).Padding(3).AlignCenter().Text(index.ToString()).FontSize(8);
+                            tabla.Cell().Background(bg).Padding(3).Text(r.FechaAnalisis?.ToString("yyyy-MM-dd") ?? "-").FontSize(8);
+                            tabla.Cell().Background(bg).Padding(3).Text(r.Procedencia ?? "-").FontSize(8);
+                            tabla.Cell().Background(bg).Padding(3).Text(string.Join(", ", r.TiposAnalisis)).FontSize(8);
+                            index++;
                         }
                     });
 
