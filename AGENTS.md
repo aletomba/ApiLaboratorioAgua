@@ -84,7 +84,8 @@ GitHub Actions workflow en `.github/workflows/ci.yml`:
 |-----------|------|------|
 | API | `ApiLaboratorioAgua/` | 5261 |
 | Frontend (Python/Tkinter) | `C:\Users\tomba\OneDrive\Escritorio\AppPlanillaPlantaPot` | — |
-| Production | `C:\Users\tomba\OneDrive\Escritorio\LaboratorioAgua_NEW\Api\` | — |
+| Production (raíz) | `C:\Users\tomba\OneDrive\Escritorio\LaboratorioAgua_NEW\` | — |
+| Production (API) | `C:\Users\tomba\OneDrive\Escritorio\LaboratorioAgua_NEW\Api\` | — |
 
 ## GitHub repos
 
