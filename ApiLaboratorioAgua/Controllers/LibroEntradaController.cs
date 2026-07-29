@@ -123,5 +123,15 @@ namespace ApiLaboratorioAgua.Controllers
             var pdfBytes = await _reporteService.GenerarPdfBytesAsync(id);
             return File(pdfBytes, "application/pdf", $"reporte_libro_{id}.pdf");
         }
+
+        [HttpPost("reporte-multiple")]
+        public async Task<IActionResult> GetReporteMultiplePdf([FromBody] ReporteMultipleRequestDto request)
+        {
+            if (request.LibroIds == null || request.LibroIds.Count == 0)
+                return BadRequest("Debe proporcionar al menos un ID de libro de entrada.");
+
+            var pdfBytes = await _reporteService.GenerarPdfMultipleBytesAsync(request.LibroIds);
+            return File(pdfBytes, "application/pdf", "reporte_multiple_libros.pdf");
+        }
     }
 }

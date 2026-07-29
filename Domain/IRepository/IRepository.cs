@@ -37,6 +37,7 @@ namespace Dominio.IRepository
         Task<(List<LibroDeEntrada> Items, int TotalCount)> GetByFechaRangoPagedAsync(DateTime desde, DateTime hasta, int page, int pageSize);
         Task<List<LibroDeEntrada>> GetByProcedenciaAsync(string procedencia);
         Task<List<LibroDeEntrada>> GetByMuestraIdAsync(int muestraId);
+        Task<List<LibroDeEntrada>> GetByIdsAsync(List<int> ids);
     }
 
     public interface ILibroBacteriologiaRepository

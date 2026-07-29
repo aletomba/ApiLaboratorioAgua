@@ -148,6 +148,16 @@ public async Task<(List<LibroDeEntrada> Items, int TotalCount)> GetAllPagedAsync
                 .ToListAsync();
         }
 
+        public async Task<List<LibroDeEntrada>> GetByIdsAsync(List<int> ids)
+        {
+            return await _context.LibroEntradas
+                .AsNoTracking()
+                .WithFullMuestras()
+                .Where(le => ids.Contains(le.Id))
+                .OrderByDescending(le => le.Fecha)
+                .ToListAsync();
+        }
+
         public async Task UpdateAsync(LibroDeEntrada libroEntrada)
         {
             var existing = await _context.LibroEntradas

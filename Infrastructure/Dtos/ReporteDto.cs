@@ -3,6 +3,20 @@ using System.Collections.Generic;
 
 namespace Infrastructure.Dtos
 {
+    public class ReporteMultipleRequestDto
+    {
+        public List<int> LibroIds { get; set; } = new();
+    }
+
+    public class ReporteResumenLibroDto
+    {
+        public int LibroId { get; set; }
+        public DateTime? FechaAnalisis { get; set; }
+        public string? Procedencia { get; set; }
+        public List<string> TiposAnalisis { get; set; } = new();
+    }
+
+
     public class ReporteLibroDto
     {
         public int LibroId { get; set; }
